@@ -3,1361 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Dodecafónico</title>
+    <title>Resoluciones Blues</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/tone@14.7.58/build/Tone.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #0C1821; /* Fondo azul muy oscuro para la calma */
+            color: #E0E0E0;
             display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .note-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .note-item {
-            background-color: #ffffff;
-            padding: 0.5rem 0.75rem;
-            border-radius: 9999px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            font-size: 1.125rem;
-            color: #4b5563;
-            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            min-width: 2.5rem;
-            text-align: center;
-        }
-        .note-highlight {
-            background-color: #60a5fa;
-            color: white;
-            box-shadow: 0 0 10px #60a5fa;
-        }
-        .card {
-            background-color: #ffffff;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-        }
-        .series-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .play-button, .stop-button {
-            padding: 0.5rem;
-            border-radius: 9999px;
-            background-color: #60a5fa;
-            color: white;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .play-button:hover, .stop-button:hover {
-            background-color: #3b82f6;
-            transform: scale(1.1);
-        }
-        .stop-button {
-            background-color: #ef4444;
-            margin-left: 0.5rem;
-        }
-        .stop-button:hover {
-            background-color: #dc2626;
-        }
-        .action-buttons {
-            display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .action-button, .transpose-button {
-            font-weight: 700;
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s;
-        }
-        .action-button:hover, .transpose-button:hover {
-            transform: scale(1.05);
-        }
-        .generate-button {
-            background-color: #2563eb;
-            color: white;
-        }
-        .save-button {
-            background-color: #4b5563;
-            color: white;
-        }
-        .toggle-button {
-            background-color: #4b5563;
-            color: white;
+            align-items: center; /* Alinea al centro para un diseño más limpio */
+            min-height: 100vh; /* Asegura que ocupe el 100% de la altura de la ventana */
+            padding: 0.5rem;
+            box-sizing: border-box;
+            overflow: hidden; /* Evita el desplazamiento */
         }
         
-        /* Uso de CSS Grid para una mejor distribución horizontal de los grupos */
-        .grouped-series-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-        
-        .group-card {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-            width: 100%; /* Asegura que el elemento ocupe todo el ancho de su columna en el grid */
+        .container {
+            background-color: #0C1821;
+            padding: 0.75rem; /* Padding más pequeño para un diseño compacto */
+            border-radius: 1rem;
+            box-shadow: none; 
+            width: 100%;
+            max-width: 600px;
+            border: none;
         }
 
-        .group-display {
+        h1 {
+            margin-bottom: 0.25rem; /* Margen reducido */
+            font-size: 2rem; /* Tamaño de fuente para el título */
+        }
+
+        .subtitle {
+            margin-bottom: 0.5rem; /* Margen reducido para el subtítulo */
+            font-size: 0.9rem;
+        }
+        
+        /* Estilos de los elementos de la UI */
+        .resolution-button {
+            width: 100%;
+            padding: 0.6rem; /* Padding ajustado para un tamaño más compacto */
+            font-size: 0.9rem; /* Tamaño de fuente ajustado */
+            font-weight: bold;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .matrix-container {
-            overflow-x: auto;
-            width: 100%;
-        }
-        #matrixTable {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.75rem;
-        }
-        #matrixTable th, #matrixTable td {
-            text-align: center;
-            padding: 0.25rem;
-            border: 1px solid #e5e7eb;
-            white-space: nowrap;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
             cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        #matrixTable thead th, #matrixTable tbody th, #matrixTable tfoot th {
-            background-color: #e5e7eb;
-            font-weight: 700;
-        }
-        .matrix-cell-highlight {
-            background-color: #a5b4fc;
+            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
+            user-select: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            background-color: #1E8449;
             color: white;
+            text-align: center;
+            border: none;
+        }
+        .resolution-button:hover {
+            background-color: #27AE60;
+        }
+        .resolution-button:active {
+            transform: scale(0.95);
+        }
+        .resolution-description {
+            font-size: 0.75rem; /* Tamaño de fuente más pequeño para la descripción */
+            color: #BDBDBD;
+            margin-top: 0.2rem; /* Margen ajustado */
+            font-weight: normal;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 0.4rem; /* Margen reducido para los controles */
+        }
+        .controls-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        .select-label {
+            margin-bottom: 0.1rem; /* Margen muy reducido para etiquetas */
             font-weight: bold;
         }
-        .matrix-header-highlight {
-            background-color: #818cf8;
-            color: white;
-        }
-        .matrix-hover-highlight-row,
-        .matrix-hover-highlight-col {
-            background-color: #e0e7ff;
-        }
-        .transpose-buttons-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-        .transpose-button {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            background-color: #6b7280;
-            color: white;
-            border-radius: 9999px;
-        }
-        .transpose-button.active {
-            background-color: #2563eb;
-            transform: scale(1.1);
-        }
-        .custom-series-input-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .custom-series-input {
-            width: 50px;
-            height: 50px;
-            text-align: center;
+        .select-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 0.4rem; /* Padding reducido */
             border-radius: 0.5rem;
-            border: 1px solid #d1d5db;
+            background-color: #333;
+            color: #E0E0E0;
+            border: 1px solid #444;
+            text-align: center;
         }
-        .text-error {
-            color: #ef4444;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+        .bpm-input {
+            max-width: 100px;
         }
-        .save-load-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-        }
-        .save-load-input {
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            border: 1px solid #d1d5db;
-        }
-        .saved-series-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .saved-series-item:last-child {
-            border-bottom: none;
-        }
-        .saved-series-item span {
-            font-weight: 500;
-            cursor: pointer;
-        }
-        .saved-series-item button {
-            background-color: #ef4444;
-            color: white;
-            border-radius: 9999px;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        .saved-series-item button:hover {
-            background-color: #dc2626;
-        }
-        .group-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
+        .highlighted-note {
+            color: #F1C40F;
+            font-weight: bold;
+            transition: color 0.1s ease-in-out;
         }
 
-        /* Responsive layout for medium screens and up */
-        @media (min-width: 768px) {
-            .md\\:flex-col {
-                flex-direction: column;
-            }
+        /* Diseño de cuadrícula para los botones */
+        .resolutions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas para todas las resoluciones */
+            gap: 0.5rem;
+            margin-top: 0.5rem; /* Margen superior reducido */
         }
-        
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
-    <div class="flex-grow p-4 md:p-8 overflow-y-auto">
-        <div id="appCard" class="max-w-7xl w-full mx-auto">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-2 tracking-tight">
-                Generador Dodecafónico
-            </h1>
-            <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto text-sm md:text-base">
-                Diseñado por Juan Miguel Rios Redondo
-            </p>
+<body>
 
-            <!-- Action buttons container -->
-            <div class="action-buttons mb-8">
-                <button id="generateRandomButton" class="action-button generate-button">
-                    Generar Nueva Serie Aleatoria
-                </button>
-                <button id="saveButton" class="action-button save-button">
-                    Guardar como Imagen
-                </button>
-                <button id="toggleNotationButton" class="action-button toggle-button">
-                    Cambiar a Notación Numérica
-                </button>
+    <div class="container mx-auto rounded-xl">
+        <h1 class="text-3xl font-bold text-center">Resoluciones Blues</h1>
+        <p class="text-center text-gray-400 text-base subtitle">
+            Selecciona el tipo de acorde, la fundamental y el ritmo para escuchar las resoluciones.
+        </p>
+
+        <p class="text-center text-gray-500 text-sm mt-1 mb-1">Diseñado por Juan Miguel Ríos Redondo</p>
+        
+        <div class="controls">
+            <label for="chordType" class="select-label">Tipo de Acorde:</label>
+            <select id="chordType" class="select-input">
+                <option value="major">Mayor / Dominante</option>
+                <option value="minor">Menor</option>
+            </select>
+        </div>
+
+        <div class="controls">
+            <label for="rootNote" class="select-label">Tonalidad (Fundamental):</label>
+            <select id="rootNote" class="select-input">
+                <option value="C">C</option>
+                <option value="C#">C# / Db</option>
+                <option value="D">D</option>
+                <option value="D#">D# / Eb</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="F#">F# / Gb</option>
+                <option value="G">G</option>
+                <option value="G#">G# / Ab</option>
+                <option value="A">A</option>
+                <option value="A#">A# / Bb</option>
+                <option value="B">B</option>
+            </select>
+        </div>
+
+        <div class="controls-row">
+            <div class="controls">
+                <label for="bpm" class="select-label">BPM:</label>
+                <input type="number" id="bpm" class="select-input bpm-input" value="80" min="40" max="240">
             </div>
-            <p id="notationHelpText" class="text-center text-gray-500 mb-6 text-sm">
-                Notas: C=0, C#=1, D=2, D#=3, E=4, F=5, F#=6, G=7, G#=8, A=9, A#=10, B=11.
-            </p>
-            
-            <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                
-                <!-- Columna Izquierda -->
-                <div class="space-y-8">
-                    <!-- Custom Series Input -->
-                    <div class="card">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Introduce tu propia Serie Dodecafónica</h3>
-                        <p class="text-sm text-gray-500 mb-4">Ingresa 12 notas de 0 a 11, sin repetir.</p>
-                        <div class="custom-series-input-container mb-4">
-                            <!-- Input fields will be generated by JS -->
-                        </div>
-                        <div class="flex justify-center gap-4">
-                            <button id="generateCustomButton" class="action-button bg-green-500 text-white">Generar</button>
-                            <button id="clearCustomButton" class="action-button bg-gray-400 text-white">Limpiar</button>
-                        </div>
-                        <p id="customInputError" class="text-center text-error mt-4 hidden">Entrada inválida. Asegúrate de que las 12 notas sean números únicos de 0 a 11.</p>
-                    </div>
-
-                    <!-- Display section for the four basic series -->
-                    <div class="card">
-                         <div class="bg-gray-100 p-4 rounded-lg shadow-inner mb-4">
-                            <div class="series-header mb-2">
-                                <h3 class="text-xl font-semibold text-gray-800">1. Prime (P)</h3>
-                                <div class="flex gap-2">
-                                    <button class="play-button" data-series-type="prime" data-target-id="primeSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                        </svg>
-                                    </button>
-                                    <button class="stop-button" data-series-type="prime" data-target-id="primeSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-4">Esta es la serie original, una secuencia única de los 12 tonos cromáticos. Sirve como base para todas las demás formas, garantizando que no contiene tríadas tonales.</p>
-                            <ul id="primeSeries" class="note-display"></ul>
-                        </div>
-                        <div class="bg-gray-100 p-4 rounded-lg shadow-inner mb-4">
-                            <div class="series-header mb-2">
-                                <h3 class="text-xl font-semibold text-gray-800">2. Inversión (I)</h3>
-                                <div class="flex gap-2">
-                                    <button class="play-button" data-series-type="inversion" data-target-id="inversionSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                        </svg>
-                                    </button>
-                                    <button class="stop-button" data-series-type="inversion" data-target-id="inversionSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-4">Se invierten los intervalos de la serie original. Si un intervalo sube, la inversión lo hace bajar en la misma cantidad de semitonos, y viceversa.</p>
-                            <ul id="inversionSeries" class="note-display"></ul>
-                        </div>
-                        <div class="bg-gray-100 p-4 rounded-lg shadow-inner mb-4">
-                            <div class="series-header mb-2">
-                                <h3 class="text-xl font-semibold text-gray-800">3. Retrógrada (R)</h3>
-                                <div class="flex gap-2">
-                                    <button class="play-button" data-series-type="retrograde" data-target-id="retrogradeSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                        </svg>
-                                    </button>
-                                    <button class="stop-button" data-series-type="retrograde" data-target-id="retrogradeSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-4">Es la serie original leída al revés, comenzando por la última nota y terminando con la primera.</p>
-                            <ul id="retrogradeSeries" class="note-display"></ul>
-                        </div>
-                        <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
-                            <div class="series-header mb-2">
-                                <h3 class="text-xl font-semibold text-gray-800">4. Inversión Retrógrada (IR)</h3>
-                                <div class="flex gap-2">
-                                    <button class="play-button" data-series-type="inversionRetrograde" data-target-id="inversionRetrogradeSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                        </svg>
-                                    </button>
-                                    <button class="stop-button" data-series-type="inversionRetrograde" data-target-id="inversionRetrogradeSeries">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                            <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-4">Es la inversión de la serie, pero leída al revés.</p>
-                            <ul id="inversionRetrogradeSeries" class="note-display"></ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Columna Derecha -->
-                <div class="space-y-8">
-                    <!-- Playback Controls -->
-                    <div class="card flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
-                        <p class="text-gray-700">Instrumento: Synth</p>
-                        <div class="flex items-center gap-2">
-                            <label for="volumeSlider" class="text-gray-700">Volumen:</label>
-                            <input type="range" id="volumeSlider" min="-30" max="0" value="-10" class="w-24">
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <label for="tempoSlider" class="text-gray-700">Tempo:</label>
-                            <input type="range" id="tempoSlider" min="60" max="240" value="120" class="w-24">
-                            <span id="tempoValue" class="text-gray-500 text-sm">120 bpm</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <label for="rhythmSelect" class="text-gray-700">Ritmo:</label>
-                            <select id="rhythmSelect" class="rounded-full px-3 py-1 bg-white border border-gray-300 shadow-sm">
-                                <option value="8n">Corchea (8n)</option>
-                                <option value="4n">Negra (4n)</option>
-                                <option value="16n">Semicorchea (16n)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Save and Load Series Section -->
-                    <div class="card">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Guardar y Cargar Serie Principal</h3>
-                        <div class="save-load-container mb-4">
-                            <input type="text" id="seriesNameInput" placeholder="Nombre de la serie" class="save-load-input">
-                            <button id="saveSeriesButton" class="action-button bg-green-600 text-white">Guardar Serie</button>
-                        </div>
-                        <div id="savedSeriesContainer">
-                            <ul id="savedSeriesList" class="divide-y divide-gray-200">
-                                <!-- Saved series will be loaded here by JS -->
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Transposition Section -->
-                    <div class="card">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Transponer Serie</h3>
-                        <p class="text-sm text-gray-500 mb-4">
-                            Selecciona una nota para transponer la serie principal a una nueva nota de inicio (P-0 a P-11).
-                        </p>
-                        <div id="transposeButtonsContainer" class="transpose-buttons-container">
-                            <!-- Transpose buttons will be generated by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Section for grouping the series -->
-                    <div class="card">
-                        <div class="series-header mb-4">
-                            <h3 class="text-xl font-semibold text-gray-800">Segmentación de la Serie Principal</h3>
-                            <select id="groupSelect" class="rounded-full px-3 py-1 bg-white border border-gray-300 shadow-sm">
-                                <option value="2">Grupos de 2</option>
-                                <option value="3">Grupos de 3</option>
-                                <option value="4">Grupos de 4</option>
-                                <option value="6">Grupos de 6</option>
-                            </select>
-                        </div>
-                        <!-- CSS Grid container for a better horizontal layout that wraps on small screens -->
-                        <div id="groupedSeriesContainer" class="grouped-series-container"></div>
-                    </div>
-                </div>
-
+            <div class="controls">
+                <label for="rhythm" class="select-label">Ritmo:</label>
+                <select id="rhythm" class="select-input">
+                    <option value="1">Negra</option>
+                    <option value="0.5" selected>Corchea</option>
+                    <option value="0.25">Semicorchea</option>
+                </select>
             </div>
-            
-            <!-- Matrix section, spanning the entire width -->
-            <div class="card mb-8">
-                <div class="series-header mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800">Matriz Dodecafónica</h3>
-                </div>
-                <p class="text-sm text-gray-500 mb-4">
-                    Esta tabla de 12x12 contiene las 48 formas posibles de la serie dodecafónica. Haz clic en cualquier celda o encabezado para ver las cuatro formas relacionadas (P, I, R, IR) en el panel de abajo.
-                    <br><br>
-                    Para leer la matriz:
-                    <ul>
-                        <li><b>P (Prime):</b> Lee las filas de izquierda a derecha. Los encabezados P están en el lado izquierdo de la matriz.</li>
-                        <li><b>I (Inversión):</b> Lee las columnas de arriba abajo. Los encabezados I están en la parte superior de la matriz.</li>
-                        <li><b>R (Retrógrada):</b> Lee las filas de derecha a izquierda.</li>
-                        <li><b>Inversión Retrógrada (IR):</b> Lee las columnas de abajo a arriba. Los encabezados IR están en la parte inferior de la matriz.</li>
-                    </ul>
-                </p>
-                <div class="matrix-container">
-                    <table id="matrixTable"></table>
-                </div>
-            </div>
-
-            <!-- New section for showing the four series from a matrix click -->
-            <div id="matrixSeriesDisplay" class="card hidden">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Formas de la Serie Relacionadas</h3>
-                
-                <div id="selectedSeriesInfoP" class="mb-4 bg-gray-100 p-4 rounded-lg shadow-inner">
-                    <div class="series-header mb-2">
-                        <h4 class="text-lg font-bold text-gray-800" id="seriesTitleP">Prime (P):</h4>
-                        <div class="flex gap-2">
-                            <button class="play-button" data-series-type="P" data-target-id="selectedSeriesNotesP">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                </svg>
-                            </button>
-                            <button class="stop-button" data-series-type="P" data-target-id="selectedSeriesNotesP">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <ul id="selectedSeriesNotesP" class="note-display"></ul>
-                </div>
-                
-                <div id="selectedSeriesInfoI" class="mb-4 bg-gray-100 p-4 rounded-lg shadow-inner">
-                    <div class="series-header mb-2">
-                        <h4 class="text-lg font-bold text-gray-800" id="seriesTitleI">Inversión (I):</h4>
-                        <div class="flex gap-2">
-                            <button class="play-button" data-series-type="I" data-target-id="selectedSeriesNotesI">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                </svg>
-                            </button>
-                            <button class="stop-button" data-series-type="I" data-target-id="selectedSeriesNotesI">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-4">Se invierten los intervalos de la serie original. Si un intervalo sube, la inversión lo hace bajar en la misma cantidad de semitonos, y viceversa.</p>
-                    <ul id="selectedSeriesNotesI" class="note-display"></ul>
-                </div>
-                
-                <div id="selectedSeriesInfoR" class="mb-4 bg-gray-100 p-4 rounded-lg shadow-inner">
-                    <div class="series-header mb-2">
-                        <h4 class="text-lg font-bold text-gray-800" id="seriesTitleR">Retrógrada (R):</h4>
-                        <div class="flex gap-2">
-                            <button class="play-button" data-series-type="R" data-target-id="selectedSeriesNotesR">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                </svg>
-                            </button>
-                            <button class="stop-button" data-series-type="R" data-target-id="selectedSeriesNotesR">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-4">Es la serie original leída al revés, comenzando por la última nota y terminando con la primera.</p>
-                    <ul id="selectedSeriesNotesR" class="note-display"></ul>
-                </div>
-
-                <div id="selectedSeriesInfoIR" class="mb-4 bg-gray-100 p-4 rounded-lg shadow-inner">
-                    <div class="series-header mb-2">
-                        <h4 class="text-lg font-bold text-gray-800" id="seriesTitleIR">Inversión Retrógrada (IR):</h4>
-                        <div class="flex gap-2">
-                            <button class="play-button" data-series-type="IR" data-target-id="selectedSeriesNotesIR">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                </svg>
-                            </button>
-                            <button class="stop-button" data-series-type="IR" data-target-id="selectedSeriesNotesIR">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                    <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-4">Es la inversión de la serie, pero leída al revés.</p>
-                    <ul id="selectedSeriesNotesIR" class="note-display"></ul>
-                </div>
-            </div>
+        </div>
+        
+        <div id="resolutions-panel" class="resolutions-grid">
+            <!-- Los botones se generarán con JavaScript -->
         </div>
     </div>
 
     <script>
+        // Inicializa el contexto de audio solo una vez
+        let audioContext;
+        let melodyOscillator;
+        let isPlaying = false;
+        
+        // Frecuencias base para cada nota
+        const baseFrequencies = {
+            'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63, 'F': 349.23,
+            'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
+        };
+
+        // Mapeo de intervalos a semitonos desde la fundamental
+        const intervalSemitones = {
+            '1': 0, '2': 2, '#2': 3, 'b3': 3, '3': 4, '4': 5, '#4': 6, 'b5': 6, '5': 7, '6': 9, 'b7': 10
+        };
+
+        // Arrays de nombres de notas para sostenidos y bemoles
+        const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+        // Resoluciones para acordes mayores y dominantes
+        const resolutionsMajor = [
+            { name: 'Resolución de #2', formula: ['#2', '3', '1'] },
+            { name: 'Resolución de b3', formula: ['b3', '2', '1'] },
+            { name: 'Resolución de 4', formula: ['4', '#2', '3', '1'] },
+            { name: 'Resolución de #4', formula: ['3', '4', '#4', '5', '#2', '3', '1'] },
+            { name: 'Resolución de b5', formula: ['b5', '4', '#2', '4', '#2', '3', '1'] },
+            { name: 'Resolución de b7 versión 1', formula: ['b7', '5'] },
+            { name: 'Resolución de b7 versión 2', formula: ['b7', '6', '5'] },
+        ];
+        
+        // Resoluciones para acordes menores
+        const resolutionsMinor = [
+            { name: 'Resolución de 2', formula: ['2', 'b3', '1'] },
+            { name: 'Resolución de b5', formula: ['b5', '5', 'b3'] },
+            { name: 'Resolución de b7', formula: ['b7', '6', '5', 'b3'] },
+            { name: 'Resolución de 6', formula: ['6', 'b7', 'b3'] },
+        ];
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Define the note names of the chromatic scale.
-            const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
-            // Tone.js variables and state
-            let synth;
-            let currentSynth;
-            let sequence;
-            let currentSeriesData;
-            let currentMatrix;
-            let selectedMatrixSeries = {};
-            let currentNotation = 'notes';
-            let currentTransposeIndex = 0;
-            let savedSeries = {};
+            // Inicializar el contexto de audio en la primera interacción del usuario
+            document.body.addEventListener('click', initAudioContext, { once: true });
+            document.body.addEventListener('touchstart', initAudioContext, { once: true });
             
-            // --- TONE.JS SETUP ---
-            const volume = new Tone.Volume(-10).toDestination();
+            const chordTypeSelector = document.getElementById('chordType');
+            const rootNoteSelector = document.getElementById('rootNote');
+            const bpmInput = document.getElementById('bpm');
+            const rhythmSelector = document.getElementById('rhythm');
+            const resolutionsPanel = document.getElementById('resolutions-panel');
             
-            synth = new Tone.PolySynth(Tone.Synth, {
-                oscillator: { type: "sine" },
-                envelope: { attack: 0.005, decay: 0.1, sustain: 0.1, release: 1 },
-            }).connect(volume);
+            chordTypeSelector.addEventListener('change', updateUI);
+            rootNoteSelector.addEventListener('change', updateUI);
+            bpmInput.addEventListener('change', updateUI);
+            rhythmSelector.addEventListener('change', updateUI);
             
-            currentSynth = synth;
+            updateUI(); // Genera la UI inicial
 
-            // --- CORE LOGIC FUNCTIONS ---
-
-            // Define triad intervals for a quick search.
-            const allTriadIntervals = [
-                [4, 3], [3, 4], [3, 5], [4, 5], [5, 4], [5, 3]
-            ];
-            
-            // Function to check if the last three notes of a series form a triad.
-            const checkForTriads = (series) => {
-                if (series.length < 3) return false;
-                const n1 = noteNames.indexOf(series[series.length - 3]);
-                const n2 = noteNames.indexOf(series[series.length - 2]);
-                const n3 = noteNames.indexOf(series[series.length - 1]);
-                const interval1 = (n2 - n1 + 12) % 12;
-                const interval2 = (n3 - n2 + 12) % 12;
-                for (const triad of allTriadIntervals) {
-                    if (interval1 === triad[0] && interval2 === triad[1]) return true;
+            function initAudioContext() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                return false;
-            };
+            }
 
-            // Function to generate a random 12-tone series without triads.
-            const generateRandomSeries = () => {
-                const availableNotes = [...noteNames];
-                const series = [];
-                const firstNoteIndex = Math.floor(Math.random() * availableNotes.length);
-                series.push(availableNotes.splice(firstNoteIndex, 1)[0]);
-
-                while (series.length < 12) {
-                    if (availableNotes.length === 0) return generateRandomSeries();
-                    const randomIndex = Math.floor(Math.random() * availableNotes.length);
-                    const newNote = availableNotes[randomIndex];
-                    const tentativeSeries = [...series, newNote];
-
-                    if (!checkForTriads(tentativeSeries)) {
-                        series.push(newNote);
-                        availableNotes.splice(randomIndex, 1);
-                    } else {
-                        availableNotes.splice(randomIndex, 1);
-                    }
-                }
-                return series;
-            };
-            
-            // Function to validate custom input
-            const validateCustomSeries = (inputs) => {
-                const numbers = inputs.map(input => parseInt(input.value));
-                const errorText = document.getElementById('customInputError');
+            function updateUI() {
+                const rootNote = rootNoteSelector.value;
+                const chordType = chordTypeSelector.value;
                 
-                // Check if all are numbers and unique and within range
-                const uniqueNumbers = new Set(numbers);
-                if (uniqueNumbers.size !== 12 || numbers.some(isNaN) || numbers.some(n => n < 0 || n > 11)) {
-                    errorText.classList.remove('hidden');
-                    return null;
-                }
-                errorText.classList.add('hidden');
+                const selectedResolutions = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
                 
-                // Convert numbers to note names
-                return numbers.map(n => noteNames[n]);
-            };
+                resolutionsPanel.innerHTML = ''; // Limpiar los botones existentes
 
-            // Function to transpose a series
-            const transposeSeries = (series, semitones) => {
-                return series.map(note => {
-                    const originalIndex = noteNames.indexOf(note);
-                    const newIndex = (originalIndex + semitones + 12) % 12;
-                    return noteNames[newIndex];
-                });
-            };
-
-            // Function to get the inversion of the series.
-            const getInversion = (prime) => {
-                const inversion = [];
-                inversion.push(prime[0]);
-                for (let i = 1; i < prime.length; i++) {
-                    const currentNoteIndex = noteNames.indexOf(prime[i]);
-                    const prevNoteIndex = noteNames.indexOf(prime[i - 1]);
-                    const interval = currentNoteIndex - prevNoteIndex;
-                    const lastInversionNoteIndex = noteNames.indexOf(inversion[i - 1]);
-                    let newNoteIndex = (lastInversionNoteIndex - interval + 12) % 12;
-                    inversion.push(noteNames[newNoteIndex]);
-                }
-                return inversion;
-            };
-
-            // Function to get the retrograde series.
-            const getRetrograde = (series) => [...series].reverse();
-
-            // Function to get the inversion retrograde.
-            const getInversionRetrograde = (series) => getInversion(series).reverse();
-
-            // Function to render a series on the page, with notation toggle.
-            const renderSeriesWithNotation = (elementId, series, notationType) => {
-                const ul = document.getElementById(elementId);
-                if (!ul) return;
-                ul.innerHTML = '';
-                series.forEach(note => {
-                    const li = document.createElement('li');
-                    li.textContent = (notationType === 'numbers') ? noteNames.indexOf(note) : note;
-                    li.className = 'note-item';
-                    ul.appendChild(li);
-                });
-            };
-
-            // Function to generate the dodecaphonic matrix.
-            const generateMatrix = (prime) => {
-                const matrix = [];
-                const inversion = getInversion(prime);
-                matrix.push(prime);
-                for (let i = 1; i < 12; i++) {
-                    const newRow = [];
-                    const firstNoteOfRow = inversion[i];
-                    newRow.push(firstNoteOfRow);
-                    for (let j = 1; j < 12; j++) {
-                        const originalInterval = (noteNames.indexOf(prime[j]) - noteNames.indexOf(prime[0]) + 12) % 12;
-                        const newNoteIndex = (noteNames.indexOf(firstNoteOfRow) + originalInterval) % 12;
-                        newRow.push(noteNames[newNoteIndex]);
-                    }
-                    matrix.push(newRow);
-                }
-                return matrix;
-            };
-
-            // Function to render the matrix on the page with click events
-            const renderMatrix = (matrix, notationType) => {
-                const table = document.getElementById('matrixTable');
-                if (!table) return;
-                table.innerHTML = '';
-                
-                // Table header with I headers
-                const thead = document.createElement('thead');
-                const headerRow = document.createElement('tr');
-                headerRow.innerHTML = '<th></th>'; // Empty cell for the corner
-                const inversionSeries = getInversion(currentSeriesData.prime);
-                inversionSeries.forEach((note, index) => {
-                    const th = document.createElement('th');
-                    th.textContent = (notationType === 'numbers') ? `I${index}` : `I${index}`; // Headers are always the same
-                    th.setAttribute('data-type', 'I');
-                    th.setAttribute('data-index', index);
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-
-                // Table body
-                const tbody = document.createElement('tbody');
-                matrix.forEach((row, rowIndex) => {
-                    const tr = document.createElement('tr');
-                    
-                    const rowHeaderP = document.createElement('th');
-                    rowHeaderP.textContent = `P${rowIndex}`;
-                    rowHeaderP.setAttribute('data-type', 'P');
-                    rowHeaderP.setAttribute('data-index', rowIndex);
-                    tr.appendChild(rowHeaderP);
-                    
-                    row.forEach((note, colIndex) => {
-                        const td = document.createElement('td');
-                        td.textContent = (notationType === 'numbers') ? noteNames.indexOf(note) : note;
-                        td.setAttribute('data-row', rowIndex);
-                        td.setAttribute('data-col', colIndex);
-                        tr.appendChild(td);
-                    });
-                    
-                    const rowHeaderR = document.createElement('th');
-                    rowHeaderR.textContent = `R${rowIndex}`;
-                    rowHeaderR.setAttribute('data-type', 'R');
-                    rowHeaderR.setAttribute('data-index', rowIndex);
-                    tr.appendChild(rowHeaderR);
-                    
-                    tbody.appendChild(tr);
-                });
-                
-                table.appendChild(tbody);
-                
-                // IR headers row at the bottom
-                const tfoot = document.createElement('tfoot');
-                const footerRow = document.createElement('tr');
-                footerRow.innerHTML = '<th></th>';
-                matrix[0].forEach((note, index) => {
-                    const th = document.createElement('th');
-                    th.textContent = `IR${index}`;
-                    th.setAttribute('data-type', 'IR');
-                    th.setAttribute('data-index', index);
-                    footerRow.appendChild(th);
-                });
-                footerRow.innerHTML += '<th></th>';
-                tfoot.appendChild(footerRow);
-                table.appendChild(tfoot);
-            };
-
-            // Function to render the grouped series with play/stop buttons
-            const renderGroupedSeries = (series, groupSize, notationType) => {
-                const container = document.getElementById('groupedSeriesContainer');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                let groupNumber = 1;
-                for (let i = 0; i < series.length; i += groupSize) {
-                    const group = series.slice(i, i + groupSize);
-                    
-                    // Contenedor para cada grupo, lo que permite que se coloquen uno al lado del otro
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'group-card';
-
-                    const groupHeader = document.createElement('div');
-                    groupHeader.className = 'group-card-header';
-                    
-                    const groupTitle = document.createElement('h4');
-                    groupTitle.className = 'font-semibold text-gray-800';
-                    groupTitle.textContent = `Grupo ${groupNumber}`;
-
-                    const playStopContainer = document.createElement('div');
-                    playStopContainer.className = 'flex gap-2';
-
-                    const playButton = document.createElement('button');
-                    playButton.className = 'play-button';
-                    playButton.setAttribute('data-group-index', i);
-                    playButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.077-6.13a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                            </svg>`;
-
-                    const stopButton = document.createElement('button');
-                    stopButton.className = 'stop-button';
-                    stopButton.setAttribute('data-group-index', i);
-                    stopButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                                <path fill-rule="evenodd" d="M2.5 5A2.5 2.5 0 015 2.5h10A2.5 2.5 0 0117.5 5v10a2.5 2.5 0 01-2.5 2.5H5A2.5 2.5 0 012.5 15V5z" clip-rule="evenodd" />
-                                            </svg>`;
-
-                    playStopContainer.appendChild(playButton);
-                    playStopContainer.appendChild(stopButton);
-                    groupHeader.appendChild(groupTitle);
-                    groupHeader.appendChild(playStopContainer);
-                    
-                    const groupList = document.createElement('ul');
-                    groupList.className = 'group-display';
-                    groupList.setAttribute('id', `groupSeries-${i}`);
-
-                    group.forEach(note => {
-                        const li = document.createElement('li');
-                        li.textContent = (notationType === 'numbers') ? noteNames.indexOf(note) : note;
-                        li.className = 'note-item';
-                        groupList.appendChild(li);
-                    });
-                    
-                    groupDiv.appendChild(groupHeader);
-                    groupDiv.appendChild(groupList);
-                    container.appendChild(groupDiv);
-                    groupNumber++;
-                }
-            };
-
-            // Function to generate and render custom series input fields
-            const renderCustomInputFields = () => {
-                const container = document.querySelector('.custom-series-input-container');
-                container.innerHTML = '';
-                for (let i = 0; i < 12; i++) {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.min = 0;
-                    input.max = 11;
-                    input.className = 'custom-series-input';
-                    input.placeholder = noteNames.indexOf(currentSeriesData?.prime?.[i]) !== -1 ? noteNames.indexOf(currentSeriesData.prime[i]) : i;
-                    input.value = noteNames.indexOf(currentSeriesData?.prime?.[i]) !== -1 ? noteNames.indexOf(currentSeriesData.prime[i]) : '';
-                    input.setAttribute('aria-label', `Nota ${i + 1}`);
-                    container.appendChild(input);
-                }
-            };
-
-            // Function to render transpose buttons
-            const renderTransposeButtons = () => {
-                const container = document.getElementById('transposeButtonsContainer');
-                container.innerHTML = '';
-                for (let i = 0; i < 12; i++) {
+                selectedResolutions.forEach((resolution, resIndex) => {
                     const button = document.createElement('button');
-                    button.textContent = `P-${i}`;
-                    button.className = `transpose-button ${i === currentTransposeIndex ? 'active' : ''}`;
-                    button.setAttribute('data-transpose-index', i);
-                    container.appendChild(button);
-                }
-            };
-            
-            // Function to clear all note highlights
-            const clearNoteHighlights = (elementId) => {
-                const ul = document.getElementById(elementId);
-                if(ul) {
-                    ul.querySelectorAll('.note-highlight').forEach(el => el.classList.remove('note-highlight'));
-                }
-            };
-            
-            // Function to stop Tone.js playback
-            const stopAllPlayback = () => {
-                if (sequence) {
-                    Tone.Transport.stop();
-                    sequence.stop();
-                    sequence.dispose();
-                    sequence = null;
-                }
-                clearNoteHighlights('primeSeries');
-                clearNoteHighlights('inversionSeries');
-                clearNoteHighlights('retrogradeSeries');
-                clearNoteHighlights('inversionRetrogradeSeries');
-                clearNoteHighlights('selectedSeriesNotesP');
-                clearNoteHighlights('selectedSeriesNotesI');
-                clearNoteHighlights('selectedSeriesNotesR');
-                clearNoteHighlights('selectedSeriesNotesIR');
-                document.querySelectorAll('#groupedSeriesContainer .note-item').forEach(el => el.classList.remove('note-highlight'));
-            };
-
-            // Function to play a series MELODICALLY using Tone.js and highlight notes
-            const playMelodicSeries = (series, targetUlId) => {
-                stopAllPlayback();
-                if (Tone.context.state !== 'running') Tone.start();
-                
-                const rhythm = document.getElementById('rhythmSelect').value;
-                const notesWithOctave = series.slice(0, 12).map(note => note + '4');
-                const noteElements = document.getElementById(targetUlId)?.querySelectorAll('.note-item');
-                
-                sequence = new Tone.Sequence((time, noteIndex) => {
-                    if (noteIndex < notesWithOctave.length) {
-                        const note = notesWithOctave[noteIndex];
-                        currentSynth.triggerAttackRelease(note, rhythm, time);
-                        
-                        clearNoteHighlights(targetUlId);
-                        
-                        if (noteElements) {
-                            noteElements[noteIndex].classList.add('note-highlight');
-                        }
-                    }
-                }, notesWithOctave.map((_, i) => i), rhythm);
-                
-                sequence.loop = false;
-                sequence.onstop = () => {
-                    Tone.Transport.stop();
-                    setTimeout(() => {
-                        clearNoteHighlights(targetUlId);
-                    }, 500);
-                };
-                
-                sequence.start(0);
-                Tone.Transport.start();
-            };
-
-            // Function to play a series HARMONICALLY (for grouped series)
-            const playHarmonicSeries = (group, targetUlId) => {
-                stopAllPlayback();
-                if (Tone.context.state !== 'running') Tone.start();
-
-                const notesWithOctave = group.map(note => note + '4');
-                const noteElements = document.getElementById(targetUlId)?.querySelectorAll('.note-item');
-                
-                sequence = new Tone.Part((time) => {
-                    currentSynth.triggerAttackRelease(notesWithOctave, "4n", time);
-                    clearNoteHighlights(targetUlId);
-                    if (noteElements) {
-                        noteElements.forEach(el => el.classList.add('note-highlight'));
-                    }
-                }, [[0, "start"]]);
-                
-                sequence.loop = false;
-                sequence.onstop = () => {
-                    Tone.Transport.stop();
-                    setTimeout(() => {
-                        clearNoteHighlights(targetUlId);
-                    }, 500);
-                };
-                
-                sequence.start(0);
-                Tone.Transport.start();
-            };
-
-            // Function to get a series from the matrix
-            const getSeriesFromMatrix = (matrix, type, index) => {
-                if (!matrix || matrix.length === 0 || index === undefined || index < 0 || index >= matrix.length) {
-                    return [];
-                }
-                if (type === 'P') {
-                    return matrix[index];
-                } else if (type === 'I') {
-                    return matrix.map(row => row[index]);
-                } else if (type === 'R') {
-                    return getRetrograde(matrix[index]);
-                } else if (type === 'IR') {
-                    return getRetrograde(matrix.map(row => row[index]));
-                }
-                return [];
-            };
-
-            // Function to handle the selection in the matrix (UPDATED)
-            const handleMatrixClick = (event) => {
-                const element = event.target.closest('td, th');
-                if (!element || !currentMatrix) return;
-                
-                let rowIndex, colIndex;
-                const tagName = element.tagName;
-                
-                if (tagName === 'TD') {
-                    rowIndex = parseInt(element.dataset.row);
-                    colIndex = parseInt(element.dataset.col);
-                } else if (tagName === 'TH') {
-                    const type = element.dataset.type;
-                    const index = parseInt(element.dataset.index);
-
-                    if (type === 'P' || type === 'R') {
-                        rowIndex = index;
-                        colIndex = (type === 'P') ? 0 : 11;
-                    } else if (type === 'I' || type === 'IR') {
-                        rowIndex = (type === 'I') ? 0 : 11;
-                        colIndex = index;
-                    }
-                } else {
-                    return;
-                }
-
-                if (isNaN(rowIndex) || isNaN(colIndex)) return;
-                
-                clearMatrixHighlights();
-                
-                // Highlight selected cell, row and column
-                const selectedCell = document.querySelector(`#matrixTable tbody tr:nth-child(${rowIndex + 1}) td:nth-child(${colIndex + 2})`);
-                if (selectedCell) selectedCell.classList.add('matrix-cell-highlight');
-                
-                const selectedRow = document.querySelector(`#matrixTable tbody tr:nth-child(${rowIndex + 1})`);
-                if (selectedRow) {
-                    selectedRow.querySelectorAll('td').forEach(td => td.classList.add('matrix-cell-highlight'));
-                    selectedRow.querySelector(`th[data-type="P"]`).classList.add('matrix-header-highlight');
-                    selectedRow.querySelector(`th[data-type="R"]`).classList.add('matrix-header-highlight');
-                }
-
-                const selectedColHeaderI = document.querySelector(`#matrixTable thead tr th[data-type="I"][data-index="${colIndex}"]`);
-                if (selectedColHeaderI) selectedColHeaderI.classList.add('matrix-header-highlight');
-
-                const selectedColHeaderIR = document.querySelector(`#matrixTable tfoot tr th[data-type="IR"][data-index="${colIndex}"]`);
-                if (selectedColHeaderIR) selectedColHeaderIR.classList.add('matrix-header-highlight');
-
-                document.querySelectorAll(`#matrixTable tbody tr`).forEach(row => {
-                    const colCell = row.querySelector(`td:nth-child(${colIndex + 2})`);
-                    if (colCell) colCell.classList.add('matrix-cell-highlight');
-                });
-
-                // Get the series from the matrix for the clicked cell or header
-                selectedMatrixSeries = {
-                    P: getSeriesFromMatrix(currentMatrix, 'P', rowIndex),
-                    I: getSeriesFromMatrix(currentMatrix, 'I', colIndex),
-                    R: getSeriesFromMatrix(currentMatrix, 'R', rowIndex),
-                    IR: getSeriesFromMatrix(currentMatrix, 'IR', colIndex)
-                };
-
-                // Set dynamic titles
-                document.getElementById('seriesTitleP').textContent = `Prime (P${rowIndex}):`;
-                document.getElementById('seriesTitleI').textContent = `Inversión (I${colIndex}):`;
-                document.getElementById('seriesTitleR').textContent = `Retrógrada (R${rowIndex}):`;
-                document.getElementById('seriesTitleIR').textContent = `Inversión Retrógrada (IR${colIndex}):`;
-
-                // Render the series in the panel
-                renderSeriesWithNotation('selectedSeriesNotesP', selectedMatrixSeries.P, currentNotation);
-                renderSeriesWithNotation('selectedSeriesNotesI', selectedMatrixSeries.I, currentNotation);
-                renderSeriesWithNotation('selectedSeriesNotesR', selectedMatrixSeries.R, currentNotation);
-                renderSeriesWithNotation('selectedSeriesNotesIR', selectedMatrixSeries.IR, currentNotation);
-                
-                document.getElementById('matrixSeriesDisplay').classList.remove('hidden');
-            };
-
-            const handleMatrixMouseOver = (event) => {
-                const element = event.target.closest('td, th');
-                if (!element) return;
-                const tagName = element.tagName;
-                if(tagName === 'TH' && element.dataset.type === 'P') {
-                    const rowIndex = parseInt(element.dataset.index);
-                    const row = document.querySelector(`#matrixTable tbody tr:nth-child(${rowIndex + 1})`);
-                    if(row) row.querySelectorAll('td').forEach(td => td.classList.add('matrix-hover-highlight-row'));
-                } else if (tagName === 'TH' && element.dataset.type === 'I') {
-                    const colIndex = parseInt(element.dataset.index);
-                    document.querySelectorAll(`#matrixTable tbody tr`).forEach(row => {
-                        const colCell = row.querySelector(`td:nth-child(${colIndex + 2})`);
-                        if (colCell) colCell.classList.add('matrix-hover-highlight-col');
-                    });
-                }
-            };
-
-            const handleMatrixMouseOut = () => {
-                document.querySelectorAll('.matrix-hover-highlight-row').forEach(cell => cell.classList.remove('matrix-hover-highlight-row'));
-                document.querySelectorAll('.matrix-hover-highlight-col').forEach(cell => cell.classList.remove('matrix-hover-highlight-col'));
-            };
-
-            // Function to clear all matrix highlights
-            const clearMatrixHighlights = () => {
-                document.querySelectorAll('.matrix-cell-highlight').forEach(cell => cell.classList.remove('matrix-cell-highlight'));
-                document.querySelectorAll('.matrix-header-highlight').forEach(header => header.classList.remove('matrix-header-highlight'));
-            };
-
-            // Main function to generate a NEW series and render everything.
-            const generateAndRenderSeries = (sourceSeries) => {
-                stopAllPlayback();
-                
-                const transposedPrime = transposeSeries(sourceSeries, currentTransposeIndex);
-                
-                const inversionSeries = getInversion(transposedPrime);
-                const retrogradeSeries = getRetrograde(transposedPrime);
-                const inversionRetrogradeSeries = getInversionRetrograde(transposedPrime);
-
-                currentSeriesData = {
-                    prime: transposedPrime,
-                    inversion: inversionSeries,
-                    retrograde: retrogradeSeries,
-                    inversionRetrograde: inversionRetrogradeSeries,
-                };
-                
-                currentMatrix = generateMatrix(transposedPrime);
-
-                // Render all series with the current notation
-                updateNotationDisplay();
-                clearMatrixHighlights();
-                document.getElementById('matrixSeriesDisplay').classList.add('hidden');
-                
-                // Update custom input fields
-                renderCustomInputFields();
-            };
-
-            // Function to update the display based on the current notation
-            const updateNotationDisplay = () => {
-                if (!currentSeriesData) return; // Exit if no data is generated yet.
-
-                const { prime, inversion, retrograde, inversionRetrograde } = currentSeriesData;
-                
-                renderSeriesWithNotation('primeSeries', prime, currentNotation);
-                renderSeriesWithNotation('inversionSeries', inversion, currentNotation);
-                renderSeriesWithNotation('retrogradeSeries', retrograde, currentNotation);
-                renderSeriesWithNotation('inversionRetrogradeSeries', inversionRetrograde, currentNotation);
-                renderMatrix(currentMatrix, currentNotation);
-                
-                const groupSelect = document.getElementById('groupSelect');
-                renderGroupedSeries(prime, parseInt(groupSelect.value), currentNotation);
-                
-                // Re-render the selected series if the matrix display is active
-                if (!document.getElementById('matrixSeriesDisplay').classList.contains('hidden')) {
-                    const selectedP = selectedMatrixSeries.P;
-                    const selectedI = selectedMatrixSeries.I;
-                    const selectedR = selectedMatrixSeries.R;
-                    const selectedIR = selectedMatrixSeries.IR;
+                    button.className = 'resolution-button';
                     
-                    if (selectedP) renderSeriesWithNotation('selectedSeriesNotesP', selectedP, currentNotation);
-                    if (selectedI) renderSeriesWithNotation('selectedSeriesNotesI', selectedI, currentNotation);
-                    if (selectedR) renderSeriesWithNotation('selectedSeriesNotesR', selectedR, currentNotation);
-                    if (selectedIR) renderSeriesWithNotation('selectedSeriesNotesIR', selectedIR, currentNotation);
-                }
-            };
+                    const noteNames = resolution.formula.map((interval, i) =>
+                        `<span class="note-name-${resIndex}-${i}">${getNoteName(rootNote, interval)}</span>`
+                    ).join(' → ');
 
-            // Function to save the interface as an image
-            const saveAsImage = () => {
-                // Get the original card element
-                const appCard = document.getElementById('appCard');
-                
-                // Create a clone of the card to work with
-                const clone = appCard.cloneNode(true);
-                clone.style.position = 'absolute';
-                clone.style.left = '-9999px';
-                document.body.appendChild(clone);
-                
-                // Find the matrix container inside the clone and adjust its style
-                const matrixContainer = clone.querySelector('.matrix-container');
-                if (matrixContainer) {
-                    matrixContainer.style.overflowX = 'visible';
-                    matrixContainer.style.width = 'max-content';
-                }
-                
-                // Capture the screenshot of the clone
-                html2canvas(clone, {
-                    scale: 2,
-                    useCORS: true
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = 'serie-dodecafonica.png';
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
+                    const formulaParts = resolution.formula.map((interval, i) =>
+                        `<span class="formula-part-${resIndex}-${i}">${interval}</span>`
+                    ).join(' → ');
                     
-                    // Remove the clone from the body after saving
-                    document.body.removeChild(clone);
-                });
-            };
-
-            // --- SAVE/LOAD FUNCTIONS ---
-            const saveSeries = () => {
-                const seriesName = document.getElementById('seriesNameInput').value;
-                if (!seriesName) {
-                    console.error('El nombre de la serie no puede estar vacío.');
-                    return;
-                }
-                if (!currentSeriesData || !currentSeriesData.prime) {
-                    console.error('No hay una serie para guardar.');
-                    return;
-                }
-                savedSeries[seriesName] = currentSeriesData.prime;
-                localStorage.setItem('dodecafonicaSavedSeries', JSON.stringify(savedSeries));
-                renderSavedSeriesList();
-                document.getElementById('seriesNameInput').value = '';
-            };
-            
-            const loadSeries = (seriesName) => {
-                const series = savedSeries[seriesName];
-                if (series) {
-                    generateAndRenderSeries(series);
-                    // Reset transpose index since we're loading a new P-0
-                    currentTransposeIndex = 0;
-                    renderTransposeButtons();
-                }
-            };
-
-            const deleteSeries = (seriesName) => {
-                delete savedSeries[seriesName];
-                localStorage.setItem('dodecafonicaSavedSeries', JSON.stringify(savedSeries));
-                renderSavedSeriesList();
-            };
-
-            const loadSavedSeriesFromLocalStorage = () => {
-                const savedData = localStorage.getItem('dodecafonicaSavedSeries');
-                if (savedData) {
-                    savedSeries = JSON.parse(savedData);
-                } else {
-                    savedSeries = {};
-                }
-                renderSavedSeriesList();
-            };
-
-            const renderSavedSeriesList = () => {
-                const list = document.getElementById('savedSeriesList');
-                list.innerHTML = '';
-                const seriesNames = Object.keys(savedSeries);
-                if (seriesNames.length === 0) {
-                    list.innerHTML = '<li class="text-center text-gray-500 py-4">No hay series guardadas.</li>';
-                } else {
-                    seriesNames.forEach(name => {
-                        const li = document.createElement('li');
-                        li.className = 'saved-series-item';
-                        
-                        const span = document.createElement('span');
-                        span.textContent = name;
-                        span.addEventListener('click', () => loadSeries(name));
-                        
-                        const deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Eliminar';
-                        deleteButton.addEventListener('click', () => deleteSeries(name));
-                        
-                        li.appendChild(span);
-                        li.appendChild(deleteButton);
-                        list.appendChild(li);
+                    button.innerHTML = `
+                        <span>${resolution.name}</span>
+                        <span class="resolution-description">Notas: ${noteNames}</span>
+                        <span class="resolution-description">Fórmula: ${formulaParts}</span>
+                    `;
+                    
+                    button.addEventListener('click', () => {
+                        if (!isPlaying) {
+                            const freqs = resolution.formula.map(interval => getNoteFrequency(rootNote, interval));
+                            const bpm = parseInt(bpmInput.value, 10);
+                            const rhythmFactor = parseFloat(rhythmSelector.value);
+                            const noteDuration = (60000 / bpm) * rhythmFactor;
+                            playSequence(freqs, noteDuration, resIndex);
+                        }
                     });
-                }
-            };
 
-            // --- EVENT LISTENERS ---
+                    resolutionsPanel.appendChild(button);
+                });
+            }
 
-            // Play/Stop button event listeners
-            document.getElementById('appCard').addEventListener('click', (event) => {
-                const playButton = event.target.closest('button.play-button');
-                const stopButton = event.target.closest('button.stop-button');
+            // Función para obtener el nombre de la nota con sostenidos o bemoles
+            function getNoteName(root, interval) {
+                const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const rootIndex = sharpNotes.indexOf(root);
+                const semitones = intervalSemitones[interval];
+                const noteIndex = (rootIndex + semitones + 12) % 12;
 
-                if (playButton) {
-                    const seriesType = playButton.dataset.seriesType;
-                    const targetUlId = playButton.dataset.targetId;
-                    const groupIndex = playButton.dataset.groupIndex;
-
-                    let seriesToPlay;
-
-                    // Handle melodic playback
-                    if (targetUlId) {
-                        if (targetUlId.startsWith('selected')) {
-                            if (selectedMatrixSeries && selectedMatrixSeries[seriesType]) {
-                                seriesToPlay = selectedMatrixSeries[seriesType];
-                            }
-                        } else if (currentSeriesData && currentSeriesData[seriesType]) {
-                            seriesToPlay = currentSeriesData[seriesType];
-                        }
-                        if (seriesToPlay) {
-                            playMelodicSeries(seriesToPlay, targetUlId);
-                        }
-                    }
-                    // Handle harmonic playback for grouped series
-                    else if (groupIndex) {
-                        const groupSize = parseInt(document.getElementById('groupSelect').value);
-                        const startIndex = parseInt(groupIndex);
-                        const groupToPlay = currentSeriesData.prime.slice(startIndex, startIndex + groupSize);
-                        const groupUlId = `groupSeries-${startIndex}`;
-                        playHarmonicSeries(groupToPlay, groupUlId);
-                    } else {
-                        console.error('Series not found for playback.');
-                    }
-                }
-
-                if (stopButton) {
-                    stopAllPlayback();
-                }
-            });
-
-            // Generate random series button
-            document.getElementById('generateRandomButton').addEventListener('click', () => {
-                const newSeries = generateRandomSeries();
-                generateAndRenderSeries(newSeries);
-            });
-
-            // Generate custom series button
-            document.getElementById('generateCustomButton').addEventListener('click', () => {
-                const customInputs = document.querySelectorAll('.custom-series-input-container input');
-                const newSeries = validateCustomSeries([...customInputs]);
-                if (newSeries) {
-                    generateAndRenderSeries(newSeries);
-                }
-            });
-            
-            // Clear custom input fields
-            document.getElementById('clearCustomButton').addEventListener('click', () => {
-                document.querySelectorAll('.custom-series-input-container input').forEach(input => input.value = '');
-            });
-
-            // Save as image button
-            document.getElementById('saveButton').addEventListener('click', saveAsImage);
-
-            // Save series to localStorage button
-            document.getElementById('saveSeriesButton').addEventListener('click', saveSeries);
-
-            // Notation toggle button
-            document.getElementById('toggleNotationButton').addEventListener('click', () => {
-                currentNotation = (currentNotation === 'notes') ? 'numbers' : 'notes';
-                const button = document.getElementById('toggleNotationButton');
-                if (currentNotation === 'notes') {
-                    button.textContent = 'Cambiar a Notación Numérica';
+                if (interval.includes('b')) {
+                    // Para bemoles, preferimos el nombre enharmónico con 'b'
+                    const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+                    return flatNotes[noteIndex];
+                } else if (interval.includes('#')) {
+                    // Para sostenidos, preferimos el nombre enharmónico con '#'
+                    return sharpNotes[noteIndex];
                 } else {
-                    button.textContent = 'Cambiar a Notación de Notas';
-                }
-                updateNotationDisplay();
-            });
-            
-            // Grouping dropdown
-            const groupSelect = document.getElementById('groupSelect');
-            groupSelect.addEventListener('change', (event) => {
-                const newGroupSize = parseInt(event.target.value);
-                if (currentSeriesData && currentSeriesData.prime) {
-                    renderGroupedSeries(currentSeriesData.prime, newGroupSize, currentNotation);
-                }
-            });
-
-            // Volume slider
-            const volumeSlider = document.getElementById('volumeSlider');
-            volumeSlider.addEventListener('input', (event) => {
-                volume.volume.value = event.target.value;
-            });
-
-            // Tempo slider
-            const tempoSlider = document.getElementById('tempoSlider');
-            const tempoValue = document.getElementById('tempoValue');
-            tempoSlider.addEventListener('input', (event) => {
-                const newTempo = event.target.value;
-                Tone.Transport.bpm.value = newTempo;
-                tempoValue.textContent = `${newTempo} bpm`;
-            });
-
-            // Transpose buttons container
-            document.getElementById('transposeButtonsContainer').addEventListener('click', (event) => {
-                const button = event.target.closest('.transpose-button');
-                if (button) {
-                    currentTransposeIndex = parseInt(button.dataset.transposeIndex);
-                    document.querySelectorAll('.transpose-button').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    if (currentSeriesData) {
-                        const originalPrime = savedSeries[Object.keys(savedSeries).find(key => JSON.stringify(savedSeries[key]) === JSON.stringify(currentSeriesData.prime))] || generateRandomSeries();
-                        generateAndRenderSeries(originalPrime);
+                    // Lógica para el caso de '4' en F, G# y A# que deben ser bemoles
+                    const flatNotesForNaturals = {
+                        'F': 'Bb',
+                        'G#': 'C#',
+                        'A#': 'D#',
+                    };
+                    if (root === 'F' && interval === '4') {
+                        return 'Bb';
                     }
+                    if (root === 'G#' && interval === '4') {
+                        return 'C#';
+                    }
+                    if (root === 'A#' && interval === '4') {
+                        return 'D#';
+                    }
+                    return sharpNotes[noteIndex];
                 }
-            });
+            }
 
-            // Listener for matrix clicks
-            document.getElementById('matrixTable').addEventListener('click', handleMatrixClick);
-            document.getElementById('matrixTable').addEventListener('mouseover', handleMatrixMouseOver);
-            document.getElementById('matrixTable').addEventListener('mouseout', handleMatrixMouseOut);
 
-            // Initial setup and rendering
-            loadSavedSeriesFromLocalStorage();
-            renderCustomInputFields();
-            renderTransposeButtons();
-            
-            // Generate the first random series on load
-            generateAndRenderSeries(generateRandomSeries());
+            // Función para obtener la frecuencia de la nota
+            function getNoteFrequency(root, interval) {
+                const rootFreq = baseFrequencies[root];
+                const semitones = intervalSemitones[interval];
+                return rootFreq * Math.pow(2, semitones / 12);
+            }
+
+            // Función para reproducir una secuencia de notas
+            async function playSequence(freqs, noteDuration, resIndex) {
+                if (!audioContext || isPlaying) return;
+                
+                isPlaying = true;
+                
+                for (let i = 0; i < freqs.length; i++) {
+                    const freq = freqs[i];
+                    
+                    // Resaltar la nota y la fórmula actual
+                    const noteElement = document.querySelector(`.note-name-${resIndex}-${i}`);
+                    const formulaElement = document.querySelector(`.formula-part-${resIndex}-${i}`);
+                    if (noteElement) noteElement.classList.add('highlighted-note');
+                    if (formulaElement) formulaElement.classList.add('highlighted-note');
+                    
+                    if (melodyOscillator) {
+                        melodyOscillator.stop();
+                        melodyOscillator.disconnect();
+                    }
+
+                    melodyOscillator = audioContext.createOscillator();
+                    melodyOscillator.type = 'sine';
+                    melodyOscillator.frequency.value = freq;
+                    melodyOscillator.connect(audioContext.destination);
+                    melodyOscillator.start();
+
+                    await new Promise(resolve => setTimeout(resolve, noteDuration));
+                    
+                    // Quitar el resaltado después de la duración de la nota
+                    if (noteElement) noteElement.classList.remove('highlighted-note');
+                    if (formulaElement) formulaElement.classList.remove('highlighted-note');
+                }
+                
+                if (melodyOscillator) {
+                    melodyOscillator.stop();
+                    melodyOscillator.disconnect();
+                    melodyOscillator = null;
+                }
+
+                isPlaying = false;
+            }
         });
     </script>
 </body>
 </html>
-
 
