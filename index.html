@@ -7,230 +7,129 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0C1821; /* Fondo azul muy oscuro para la calma */
+            background-color: #121212;
             color: #E0E0E0;
             display: flex;
             justify-content: center;
-            align-items: center; /* Alinea al centro para un diseño más limpio */
-            min-height: 100vh; /* Asegura que ocupe el 100% de la altura de la ventana */
-            padding: 0.5rem;
-            box-sizing: border-box;
-            overflow: hidden; /* Evita el desplazamiento */
+            align-items: center;
+            min-height: 100vh;
         }
-        
         .container {
-            background-color: #0C1821;
-            padding: 0.75rem; /* Padding más pequeño para un diseño compacto */
+            background-color: #1E1E1E;
+            padding: 2rem;
             border-radius: 1rem;
-            box-shadow: none; 
-            width: 100%;
-            max-width: 600px;
-            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            width: 500px;
         }
-
-        h1 {
-            margin-bottom: 0.25rem; /* Margen reducido */
-            font-size: 2rem; /* Tamaño de fuente para el título */
-        }
-
-        .subtitle {
-            margin-bottom: 0.5rem; /* Margen reducido para el subtítulo */
-            font-size: 0.9rem;
-        }
-        
-        /* Estilos de los elementos de la UI */
         .resolution-button {
             width: 100%;
-            padding: 0.6rem; /* Padding ajustado para un tamaño más compacto */
-            font-size: 0.9rem; /* Tamaño de fuente ajustado */
+            padding: 1rem;
+            font-size: 1rem;
             font-weight: bold;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             border-radius: 0.5rem;
             cursor: pointer;
             transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
+            margin: 0.5rem 0;
             user-select: none;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-            background-color: #1E8449;
+            background-color: #388E3C; /* Verde */
             color: white;
             text-align: center;
-            border: none;
         }
         .resolution-button:hover {
-            background-color: #27AE60;
+            background-color: #2E7D32;
         }
         .resolution-button:active {
             transform: scale(0.95);
         }
         .resolution-description {
-            font-size: 0.75rem; /* Tamaño de fuente más pequeño para la descripción */
+            font-size: 0.875rem;
             color: #BDBDBD;
-            margin-top: 0.2rem; /* Margen ajustado */
-            font-weight: normal;
+            margin-top: 0.5rem;
         }
         .controls {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 0.4rem; /* Margen reducido para los controles */
-        }
-        .controls-row {
-            display: flex;
             gap: 1rem;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 0.25rem;
-        }
-        .select-label {
-            margin-bottom: 0.1rem; /* Margen muy reducido para etiquetas */
-            font-weight: bold;
-        }
-        .select-input {
-            width: 100%;
-            max-width: 200px;
-            padding: 0.4rem; /* Padding reducido */
-            border-radius: 0.5rem;
-            background-color: #333;
-            color: #E0E0E0;
-            border: 1px solid #444;
-            text-align: center;
-        }
-        .bpm-input {
-            max-width: 100px;
-        }
-        .highlighted-note {
-            color: #F1C40F;
-            font-weight: bold;
-            transition: color 0.1s ease-in-out;
-        }
-
-        /* Diseño de cuadrícula para los botones */
-        .resolutions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas para todas las resoluciones */
-            gap: 0.5rem;
-            margin-top: 0.5rem; /* Margen superior reducido */
+            margin-top: 1rem;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-    <div class="container mx-auto rounded-xl">
-        <h1 class="text-3xl font-bold text-center">Resoluciones Blues</h1>
-        <p class="text-center text-gray-400 text-base subtitle">
-            Selecciona el tipo de acorde, la fundamental y el ritmo para escuchar las resoluciones.
+    <div class="container mx-auto p-8 rounded-xl shadow-lg bg-gray-800">
+        <h1 class="text-3xl font-bold text-center mb-2">Resoluciones Blues en C</h1>
+        <p class="text-center text-gray-400 mb-6">
+            Presiona cada botón para escuchar la secuencia de notas de cada resolución.
         </p>
-
-        <p class="text-center text-gray-500 text-sm mt-1 mb-1">Diseñado por Juan Miguel Ríos Redondo</p>
         
-        <div class="controls">
-            <label for="chordType" class="select-label">Tipo de Acorde:</label>
-            <select id="chordType" class="select-input">
-                <option value="major">Mayor / Dominante</option>
-                <option value="minor">Menor</option>
-            </select>
-        </div>
-
-        <div class="controls">
-            <label for="rootNote" class="select-label">Tonalidad (Fundamental):</label>
-            <select id="rootNote" class="select-input">
-                <option value="C">C</option>
-                <option value="C#">C# / Db</option>
-                <option value="D">D</option>
-                <option value="D#">D# / Eb</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="F#">F# / Gb</option>
-                <option value="G">G</option>
-                <option value="G#">G# / Ab</option>
-                <option value="A">A</option>
-                <option value="A#">A# / Bb</option>
-                <option value="B">B</option>
-            </select>
-        </div>
-
-        <div class="controls-row">
-            <div class="controls">
-                <label for="bpm" class="select-label">BPM:</label>
-                <input type="number" id="bpm" class="select-input bpm-input" value="80" min="40" max="240">
-            </div>
-            <div class="controls">
-                <label for="rhythm" class="select-label">Ritmo:</label>
-                <select id="rhythm" class="select-input">
-                    <option value="1">Negra</option>
-                    <option value="0.5" selected>Corchea</option>
-                    <option value="0.25">Semicorchea</option>
-                </select>
-            </div>
-        </div>
-        
-        <div id="resolutions-panel" class="resolutions-grid">
+        <div id="resolutions-panel" class="flex flex-col items-center">
             <!-- Los botones se generarán con JavaScript -->
         </div>
     </div>
 
     <script>
-        // Inicializa el contexto de audio solo una vez
+        // Asegúrate de que el contexto de audio esté listo
         let audioContext;
-        let melodyOscillator;
+        let oscillator;
         let isPlaying = false;
-        
-        // Frecuencias base para cada nota
-        const baseFrequencies = {
-            'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63, 'F': 349.23,
-            'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
-        };
-
-        // Mapeo de intervalos a semitonos desde la fundamental
-        const intervalSemitones = {
-            '1': 0, '2': 2, '#2': 3, 'b3': 3, '3': 4, '4': 5, '#4': 6, 'b5': 6, '5': 7, '6': 9, 'b7': 10
-        };
-
-        // Arrays de nombres de notas para sostenidos y bemoles
-        const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
-        // Resoluciones para acordes mayores y dominantes
-        const resolutionsMajor = [
-            { name: 'Resolución de #2', formula: ['#2', '3', '1'] },
-            { name: 'Resolución de b3', formula: ['b3', '2', '1'] },
-            { name: 'Resolución de 4', formula: ['4', '#2', '3', '1'] },
-            { name: 'Resolución de #4', formula: ['3', '4', '#4', '5', '#2', '3', '1'] },
-            { name: 'Resolución de b5', formula: ['b5', '4', '#2', '4', '#2', '3', '1'] },
-            { name: 'Resolución de b7 versión 1', formula: ['b7', '5'] },
-            { name: 'Resolución de b7 versión 2', formula: ['b7', '6', '5'] },
-        ];
-        
-        // Resoluciones para acordes menores
-        const resolutionsMinor = [
-            { name: 'Resolución de 2', formula: ['2', 'b3', '1'] },
-            { name: 'Resolución de b5', formula: ['b5', '5', 'b3'] },
-            { name: 'Resolución de b7', formula: ['b7', '6', '5', 'b3'] },
-            { name: 'Resolución de 6', formula: ['6', 'b7', 'b3'] },
-        ];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar el contexto de audio en la primera interacción del usuario
+            // Inicializar el contexto de audio en la interacción del usuario
             document.body.addEventListener('click', initAudioContext, { once: true });
             document.body.addEventListener('touchstart', initAudioContext, { once: true });
             
-            const chordTypeSelector = document.getElementById('chordType');
-            const rootNoteSelector = document.getElementById('rootNote');
-            const bpmInput = document.getElementById('bpm');
-            const rhythmSelector = document.getElementById('rhythm');
-            const resolutionsPanel = document.getElementById('resolutions-panel');
-            
-            chordTypeSelector.addEventListener('change', updateUI);
-            rootNoteSelector.addEventListener('change', updateUI);
-            bpmInput.addEventListener('change', updateUI);
-            rhythmSelector.addEventListener('change', updateUI);
-            
-            updateUI(); // Genera la UI inicial
+            // Frecuencias de las notas en la tonalidad de Do (C)
+            const noteFrequencies = {
+                '1': 261.63, // C
+                '2': 293.66, // D
+                '#2': 311.13, // D# o Eb
+                'b3': 311.13, // D# o Eb
+                '3': 329.63, // E
+                '4': 349.23, // F
+                '#4': 369.99, // F# o Gb
+                'b5': 369.99, // F# o Gb
+                '5': 392.00, // G
+                '6': 440.00, // A
+                'b7': 466.16 // Bb
+            };
+
+            // Resoluciones proporcionadas por el usuario
+            const resolutions = [
+                { name: 'Resolución de #2', notes: ['#2', '3', '1'] },
+                { name: 'Resolución de b3', notes: ['b3', '2', '1'] },
+                { name: 'Resolución de 4', notes: ['4', '#2', '3', '1'] },
+                { name: 'Resolución de #4', notes: ['3', '4', '#4', '5', '#2', '3', '1'] },
+                { name: 'Resolución de b5', notes: ['b5', '4', '#2', '4', '#2', '3', '1'] },
+                { name: 'Resolución de b7 versión 1', notes: ['b7', '5'] },
+                { name: 'Resolución de b7 versión 2', notes: ['b7', '6', '5'] },
+            ];
+
+            const panel = document.getElementById('resolutions-panel');
+            resolutions.forEach(resolution => {
+                const button = document.createElement('button');
+                button.className = 'resolution-button';
+                button.innerHTML = `
+                    <span>${resolution.name}</span>
+                    <span class="resolution-description">(${resolution.notes.join(' → ')})</span>
+                `;
+                
+                button.addEventListener('click', () => {
+                    if (!isPlaying) {
+                        const freqs = resolution.notes.map(note => noteFrequencies[note]);
+                        playSequence(freqs, 350); // Reproduce la secuencia con una duración de 350ms por nota
+                    }
+                });
+
+                panel.appendChild(button);
+            });
 
             function initAudioContext() {
                 if (!audioContext) {
@@ -238,125 +137,35 @@
                 }
             }
 
-            function updateUI() {
-                const rootNote = rootNoteSelector.value;
-                const chordType = chordTypeSelector.value;
-                
-                const selectedResolutions = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
-                
-                resolutionsPanel.innerHTML = ''; // Limpiar los botones existentes
-
-                selectedResolutions.forEach((resolution, resIndex) => {
-                    const button = document.createElement('button');
-                    button.className = 'resolution-button';
-                    
-                    const noteNames = resolution.formula.map((interval, i) =>
-                        `<span class="note-name-${resIndex}-${i}">${getNoteName(rootNote, interval)}</span>`
-                    ).join(' → ');
-
-                    const formulaParts = resolution.formula.map((interval, i) =>
-                        `<span class="formula-part-${resIndex}-${i}">${interval}</span>`
-                    ).join(' → ');
-                    
-                    button.innerHTML = `
-                        <span>${resolution.name}</span>
-                        <span class="resolution-description">Notas: ${noteNames}</span>
-                        <span class="resolution-description">Fórmula: ${formulaParts}</span>
-                    `;
-                    
-                    button.addEventListener('click', () => {
-                        if (!isPlaying) {
-                            const freqs = resolution.formula.map(interval => getNoteFrequency(rootNote, interval));
-                            const bpm = parseInt(bpmInput.value, 10);
-                            const rhythmFactor = parseFloat(rhythmSelector.value);
-                            const noteDuration = (60000 / bpm) * rhythmFactor;
-                            playSequence(freqs, noteDuration, resIndex);
-                        }
-                    });
-
-                    resolutionsPanel.appendChild(button);
-                });
-            }
-
-            // Función para obtener el nombre de la nota con sostenidos o bemoles
-            function getNoteName(root, interval) {
-                const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-                const rootIndex = sharpNotes.indexOf(root);
-                const semitones = intervalSemitones[interval];
-                const noteIndex = (rootIndex + semitones + 12) % 12;
-
-                if (interval.includes('b')) {
-                    // Para bemoles, preferimos el nombre enharmónico con 'b'
-                    const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-                    return flatNotes[noteIndex];
-                } else if (interval.includes('#')) {
-                    // Para sostenidos, preferimos el nombre enharmónico con '#'
-                    return sharpNotes[noteIndex];
-                } else {
-                    // Lógica para el caso de '4' en F, G# y A# que deben ser bemoles
-                    const flatNotesForNaturals = {
-                        'F': 'Bb',
-                        'G#': 'C#',
-                        'A#': 'D#',
-                    };
-                    if (root === 'F' && interval === '4') {
-                        return 'Bb';
-                    }
-                    if (root === 'G#' && interval === '4') {
-                        return 'C#';
-                    }
-                    if (root === 'A#' && interval === '4') {
-                        return 'D#';
-                    }
-                    return sharpNotes[noteIndex];
-                }
-            }
-
-
-            // Función para obtener la frecuencia de la nota
-            function getNoteFrequency(root, interval) {
-                const rootFreq = baseFrequencies[root];
-                const semitones = intervalSemitones[interval];
-                return rootFreq * Math.pow(2, semitones / 12);
-            }
-
-            // Función para reproducir una secuencia de notas
-            async function playSequence(freqs, noteDuration, resIndex) {
+            // Reproduce una secuencia de frecuencias con una duración específica por nota
+            async function playSequence(freqs, noteDuration) {
                 if (!audioContext || isPlaying) return;
-                
+
                 isPlaying = true;
-                
+
                 for (let i = 0; i < freqs.length; i++) {
                     const freq = freqs[i];
                     
-                    // Resaltar la nota y la fórmula actual
-                    const noteElement = document.querySelector(`.note-name-${resIndex}-${i}`);
-                    const formulaElement = document.querySelector(`.formula-part-${resIndex}-${i}`);
-                    if (noteElement) noteElement.classList.add('highlighted-note');
-                    if (formulaElement) formulaElement.classList.add('highlighted-note');
-                    
-                    if (melodyOscillator) {
-                        melodyOscillator.stop();
-                        melodyOscillator.disconnect();
+                    // Detiene cualquier oscilador previo
+                    if (oscillator) {
+                        oscillator.stop();
+                        oscillator.disconnect();
                     }
 
-                    melodyOscillator = audioContext.createOscillator();
-                    melodyOscillator.type = 'sine';
-                    melodyOscillator.frequency.value = freq;
-                    melodyOscillator.connect(audioContext.destination);
-                    melodyOscillator.start();
+                    oscillator = audioContext.createOscillator();
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = freq;
+                    oscillator.connect(audioContext.destination);
+                    oscillator.start();
 
                     await new Promise(resolve => setTimeout(resolve, noteDuration));
-                    
-                    // Quitar el resaltado después de la duración de la nota
-                    if (noteElement) noteElement.classList.remove('highlighted-note');
-                    if (formulaElement) formulaElement.classList.remove('highlighted-note');
                 }
-                
-                if (melodyOscillator) {
-                    melodyOscillator.stop();
-                    melodyOscillator.disconnect();
-                    melodyOscillator = null;
+
+                // Detiene el último oscilador
+                if (oscillator) {
+                    oscillator.stop();
+                    oscillator.disconnect();
+                    oscillator = null;
                 }
 
                 isPlaying = false;
