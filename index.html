@@ -98,7 +98,7 @@
         .resolution-button {
             width: 100%;
             padding: 0.5rem;
-            font-size: 1rem; /* Aumento del tamaño de fuente */
+            font-size: 1rem;
             font-weight: bold;
             display: flex;
             flex-direction: column;
@@ -120,8 +120,16 @@
         .resolution-button:active {
             transform: scale(0.95);
         }
+        
+        /* Estilo para los botones seleccionados */
+        .resolution-button.selected {
+            background-color: #F1C40F;
+            color: #0C1821;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
         .resolution-description {
-            font-size: 0.75rem; /* Aumento del tamaño de fuente */
+            font-size: 0.75rem;
             color: #BDBDBD;
             margin-top: 0.15rem;
             font-weight: normal;
@@ -132,13 +140,79 @@
             font-weight: bold;
             transition: color 0.1s ease-in-out;
         }
-
+        .resolution-button.selected .resolution-description {
+            color: #333;
+        }
+        
         /* Estilos de cuadrícula para los botones */
         .resolutions-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 0.4rem;
             margin-top: 0.4rem;
+        }
+        
+        /* Estilos para el panel de selecciones y los botones de control */
+        .selection-panel {
+            background-color: #2C3E50;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            margin-top: 0.8rem;
+            width: 100%;
+        }
+
+        .selection-panel-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 0.4rem;
+        }
+
+        .selection-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.2rem;
+            min-height: 2rem;
+        }
+
+        .selected-item {
+            background-color: #5D5D5D;
+            color: #E0E0E0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
+        }
+
+        .play-button {
+            background-color: #3498DB;
+            color: white;
+        }
+        .play-button:hover {
+            background-color: #2980B9;
+        }
+
+        .clear-button {
+            background-color: #E74C3C;
+            color: white;
+        }
+        .clear-button:hover {
+            background-color: #C0392B;
         }
 
         /* Estilo para los créditos */
@@ -211,6 +285,18 @@
             <!-- Los botones se generarán con JavaScript -->
         </div>
 
+        <!-- Nuevo panel para las resoluciones seleccionadas -->
+        <div class="selection-panel">
+            <div class="selection-panel-title">Resoluciones Seleccionadas:</div>
+            <div id="selected-resolutions-list" class="selection-list">
+                <!-- Los nombres de las resoluciones seleccionadas aparecerán aquí -->
+            </div>
+            <div class="action-buttons">
+                <button id="play-combination-button" class="action-button play-button">Reproducir</button>
+                <button id="clear-selection-button" class="action-button clear-button">Limpiar</button>
+            </div>
+        </div>
+
         <p class="text-center credits">Diseñado por Juan Miguel Ríos Redondo</p>
     </div>
 
@@ -220,6 +306,9 @@
         let reverb;
         let isPlaying = false;
         
+        // Array para almacenar las resoluciones seleccionadas
+        let selectedResolutions = [];
+
         // Frecuencias base para cada nota
         const baseFrequencies = {
             'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63, 'F': 349.23,
@@ -237,21 +326,21 @@
 
         // Resoluciones para acordes mayores y dominantes
         const resolutionsMajor = [
-            { name: 'Resolución de #2', formula: ['#2', '3', '1'] },
-            { name: 'Resolución de b3', formula: ['b3', '2', '1'] },
-            { name: 'Resolución de 4', formula: ['4', '#2', '3', '1'] },
-            { name: 'Resolución de #4', formula: ['3', '4', '#4', '5', '#2', '3', '1'] },
-            { name: 'Resolución de b5', formula: ['b5', '4', '#2', '4', '#2', '3', '1'] },
-            { name: 'Resolución de b7 versión 1', formula: ['b7', '5'] },
-            { name: 'Resolución de b7 versión 2', formula: ['b7', '6', '5'] },
+            { id: 'major-0', name: 'Resolución de #2', formula: ['#2', '3', '1'] },
+            { id: 'major-1', name: 'Resolución de b3', formula: ['b3', '2', '1'] },
+            { id: 'major-2', name: 'Resolución de 4', formula: ['4', '#2', '3', '1'] },
+            { id: 'major-3', name: 'Resolución de #4', formula: ['3', '4', '#4', '5', '#2', '3', '1'] },
+            { id: 'major-4', name: 'Resolución de b5', formula: ['b5', '4', '#2', '4', '#2', '3', '1'] },
+            { id: 'major-5', name: 'Resolución de b7 versión 1', formula: ['b7', '5'] },
+            { id: 'major-6', name: 'Resolución de b7 versión 2', formula: ['b7', '6', '5'] },
         ];
         
         // Resoluciones para acordes menores
         const resolutionsMinor = [
-            { name: 'Resolución de 2', formula: ['2', 'b3', '1'] },
-            { name: 'Resolución de b5', formula: ['b5', '5', 'b3'] },
-            { name: 'Resolución de b7', formula: ['b7', '6', '5', 'b3'] },
-            { name: 'Resolución de 6', formula: ['6', 'b7', 'b3'] },
+            { id: 'minor-0', name: 'Resolución de 2', formula: ['2', 'b3', '1'] },
+            { id: 'minor-1', name: 'Resolución de b5', formula: ['b5', '5', 'b3'] },
+            { id: 'minor-2', name: 'Resolución de b7', formula: ['b7', '6', '5', 'b3'] },
+            { id: 'minor-3', name: 'Resolución de 6', formula: ['6', 'b7', 'b3'] },
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -264,11 +353,16 @@
             const bpmInput = document.getElementById('bpm');
             const rhythmSelector = document.getElementById('rhythm');
             const resolutionsPanel = document.getElementById('resolutions-panel');
+            const playButton = document.getElementById('play-combination-button');
+            const clearButton = document.getElementById('clear-selection-button');
+            const selectedResolutionsList = document.getElementById('selected-resolutions-list');
             
             chordTypeSelector.addEventListener('change', updateUI);
             rootNoteSelector.addEventListener('change', updateUI);
             bpmInput.addEventListener('change', updateUI);
             rhythmSelector.addEventListener('change', updateUI);
+            playButton.addEventListener('click', playCombinedSequence);
+            clearButton.addEventListener('click', clearSelection);
             
             updateUI(); // Generar la UI inicial
 
@@ -302,20 +396,22 @@
                 const rootNote = rootNoteSelector.value;
                 const chordType = chordTypeSelector.value;
                 
-                const selectedResolutions = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
+                const selectedResolutionsData = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
                 
                 resolutionsPanel.innerHTML = ''; // Limpiar los botones existentes
 
-                selectedResolutions.forEach((resolution, resIndex) => {
+                selectedResolutionsData.forEach((resolution, resIndex) => {
                     const button = document.createElement('button');
                     button.className = 'resolution-button';
-                    
+                    button.setAttribute('data-id', resolution.id);
+                    button.setAttribute('data-res-index', resIndex); // Añadir índice para el resaltado
+
                     const noteNames = resolution.formula.map((interval, i) =>
-                        `<span class="note-name-${resIndex}-${i}">${getNoteName(rootNote, interval)}</span>`
+                        `<span class="note-name-${resolution.id}-${i}">${getNoteName(rootNote, interval)}</span>`
                     ).join(' → ');
 
                     const formulaParts = resolution.formula.map((interval, i) =>
-                        `<span class="formula-part-${resIndex}-${i}">${interval}</span>`
+                        `<span class="formula-part-${resolution.id}-${i}">${interval}</span>`
                     ).join(' → ');
                     
                     button.innerHTML = `
@@ -325,18 +421,115 @@
                     `;
                     
                     button.addEventListener('click', () => {
-                        if (!isPlaying) {
-                            // Obtener los nombres de las notas en formato Tone.js (ej: 'C4', 'D#4')
-                            const notes = resolution.formula.map(interval => getNoteName(rootNote, interval) + '4');
-                            const bpm = parseInt(bpmInput.value, 10);
-                            const rhythmFactor = parseFloat(rhythmSelector.value);
-                            const noteDuration = (60000 / bpm) * rhythmFactor;
-                            playSequence(notes, noteDuration, resIndex);
-                        }
+                        toggleSelection(resolution.id);
                     });
 
                     resolutionsPanel.appendChild(button);
                 });
+
+                // Mantener el estado de selección al actualizar la UI
+                selectedResolutions.forEach(id => {
+                    const button = document.querySelector(`.resolution-button[data-id="${id}"]`);
+                    if (button) {
+                        button.classList.add('selected');
+                    }
+                });
+                updateSelectedListUI();
+            }
+
+            function toggleSelection(id) {
+                const index = selectedResolutions.indexOf(id);
+                const button = document.querySelector(`.resolution-button[data-id="${id}"]`);
+                if (index > -1) {
+                    // Si ya está seleccionado, lo quitamos
+                    selectedResolutions.splice(index, 1);
+                    button.classList.remove('selected');
+                } else {
+                    // Si no está seleccionado, lo añadimos
+                    selectedResolutions.push(id);
+                    button.classList.add('selected');
+                }
+                updateSelectedListUI();
+            }
+
+            function updateSelectedListUI() {
+                selectedResolutionsList.innerHTML = '';
+                if (selectedResolutions.length === 0) {
+                    selectedResolutionsList.innerHTML = '<span class="selected-item">Ninguna</span>';
+                } else {
+                    selectedResolutions.forEach(id => {
+                        const chordType = chordTypeSelector.value;
+                        const resolutionsData = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
+                        const resolution = resolutionsData.find(res => res.id === id);
+                        if (resolution) {
+                            const item = document.createElement('span');
+                            item.className = 'selected-item';
+                            item.textContent = resolution.name;
+                            selectedResolutionsList.appendChild(item);
+                        }
+                    });
+                }
+            }
+            
+            async function playCombinedSequence() {
+                if (!synth || isPlaying) {
+                    return;
+                }
+
+                if (selectedResolutions.length === 0) {
+                    console.log('No hay resoluciones seleccionadas.');
+                    return;
+                }
+
+                isPlaying = true;
+                const bpm = parseInt(bpmInput.value, 10);
+                const rhythmFactor = parseFloat(rhythmSelector.value);
+                const noteDuration = (60000 / bpm) * rhythmFactor;
+                const rootNote = rootNoteSelector.value;
+                const chordType = chordTypeSelector.value;
+                const resolutionsData = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
+
+                // Combinar las fórmulas de todas las resoluciones seleccionadas
+                const combinedNotes = [];
+                for (const id of selectedResolutions) {
+                    const resolution = resolutionsData.find(res => res.id === id);
+                    if (resolution) {
+                        const notes = resolution.formula.map(interval => getNoteName(rootNote, interval) + '4');
+                        combinedNotes.push({ id: id, notes: notes });
+                    }
+                }
+                
+                // Reproducir la secuencia combinada
+                for (const { id, notes } of combinedNotes) {
+                     for (let i = 0; i < notes.length; i++) {
+                        const note = notes[i];
+                        
+                        // Resaltar la nota y la fórmula actual
+                        const noteElement = document.querySelector(`.note-name-${id}-${i}`);
+                        const formulaElement = document.querySelector(`.formula-part-${id}-${i}`);
+                        if (noteElement) noteElement.classList.add('highlighted-note');
+                        if (formulaElement) formulaElement.classList.add('highlighted-note');
+                        
+                        // Disparar la nota con Tone.js
+                        synth.triggerAttackRelease(note, noteDuration / 1000);
+                        
+                        // Esperar la duración de la nota antes de pasar a la siguiente
+                        await new Promise(resolve => setTimeout(resolve, noteDuration));
+                        
+                        // Quitar el resaltado después de la duración de la nota
+                        if (noteElement) noteElement.classList.remove('highlighted-note');
+                        if (formulaElement) formulaElement.classList.remove('highlighted-note');
+                    }
+                }
+
+                isPlaying = false;
+            }
+
+            function clearSelection() {
+                selectedResolutions = [];
+                const buttons = document.querySelectorAll('.resolution-button.selected');
+                buttons.forEach(button => button.classList.remove('selected'));
+                updateSelectedListUI();
             }
 
             // Función para obtener el nombre de la nota con sostenidos o bemoles
@@ -366,35 +559,6 @@
                     }
                     return sharpNotes[noteIndex];
                 }
-            }
-            
-            // Función para reproducir una secuencia de notas con Tone.js
-            async function playSequence(notes, noteDuration, resIndex) {
-                if (!synth || isPlaying) return;
-                
-                isPlaying = true;
-                
-                for (let i = 0; i < notes.length; i++) {
-                    const note = notes[i];
-                    
-                    // Resaltar la nota y la fórmula actual
-                    const noteElement = document.querySelector(`.note-name-${resIndex}-${i}`);
-                    const formulaElement = document.querySelector(`.formula-part-${resIndex}-${i}`);
-                    if (noteElement) noteElement.classList.add('highlighted-note');
-                    if (formulaElement) formulaElement.classList.add('highlighted-note');
-                    
-                    // Disparar la nota con Tone.js
-                    synth.triggerAttackRelease(note, noteDuration / 1000);
-                    
-                    // Esperar la duración de la nota antes de pasar a la siguiente
-                    await new Promise(resolve => setTimeout(resolve, noteDuration));
-                    
-                    // Quitar el resaltado después de la duración de la nota
-                    if (noteElement) noteElement.classList.remove('highlighted-note');
-                    if (formulaElement) formulaElement.classList.remove('highlighted-note');
-                }
-                
-                isPlaying = false;
             }
         });
     </script>
