@@ -420,8 +420,29 @@
                         <span class="resolution-description">Fórmula: ${formulaParts}</span>
                     `;
                     
-                    button.addEventListener('click', () => {
-                        toggleSelection(resolution.id);
+                    button.addEventListener('click', async () => {
+                        const index = selectedResolutions.indexOf(resolution.id);
+
+                        if (index === -1) {
+                            // La resolución NO está seleccionada, la seleccionamos y reproducimos
+                            selectedResolutions.push(resolution.id);
+                            button.classList.add('selected');
+                            updateSelectedListUI();
+
+                            if (!isPlaying) {
+                                const notes = resolution.formula.map(interval => getNoteName(rootNote, interval) + '4');
+                                const bpm = parseInt(bpmInput.value, 10);
+                                const rhythmFactor = parseFloat(rhythmSelector.value);
+                                const noteDuration = (60000 / bpm) * rhythmFactor;
+                                await playSequence(resolution.id, notes, noteDuration);
+                            }
+                        } else {
+                            // La resolución YA está seleccionada, la deseleccionamos
+                            selectedResolutions.splice(index, 1);
+                            button.classList.remove('selected');
+                            updateSelectedListUI();
+                            // NO se reproduce el sonido al deseleccionar
+                        }
                     });
 
                     resolutionsPanel.appendChild(button);
@@ -434,21 +455,6 @@
                         button.classList.add('selected');
                     }
                 });
-                updateSelectedListUI();
-            }
-
-            function toggleSelection(id) {
-                const index = selectedResolutions.indexOf(id);
-                const button = document.querySelector(`.resolution-button[data-id="${id}"]`);
-                if (index > -1) {
-                    // Si ya está seleccionado, lo quitamos
-                    selectedResolutions.splice(index, 1);
-                    button.classList.remove('selected');
-                } else {
-                    // Si no está seleccionado, lo añadimos
-                    selectedResolutions.push(id);
-                    button.classList.add('selected');
-                }
                 updateSelectedListUI();
             }
 
@@ -489,39 +495,15 @@
                 const chordType = chordTypeSelector.value;
                 const resolutionsData = chordType === 'major' ? resolutionsMajor : resolutionsMinor;
 
-                // Combinar las fórmulas de todas las resoluciones seleccionadas
-                const combinedNotes = [];
                 for (const id of selectedResolutions) {
                     const resolution = resolutionsData.find(res => res.id === id);
                     if (resolution) {
                         const notes = resolution.formula.map(interval => getNoteName(rootNote, interval) + '4');
-                        combinedNotes.push({ id: id, notes: notes });
+                        // Reproducir cada resolución en la secuencia combinada
+                        await playSequence(id, notes, noteDuration);
                     }
                 }
                 
-                // Reproducir la secuencia combinada
-                for (const { id, notes } of combinedNotes) {
-                     for (let i = 0; i < notes.length; i++) {
-                        const note = notes[i];
-                        
-                        // Resaltar la nota y la fórmula actual
-                        const noteElement = document.querySelector(`.note-name-${id}-${i}`);
-                        const formulaElement = document.querySelector(`.formula-part-${id}-${i}`);
-                        if (noteElement) noteElement.classList.add('highlighted-note');
-                        if (formulaElement) formulaElement.classList.add('highlighted-note');
-                        
-                        // Disparar la nota con Tone.js
-                        synth.triggerAttackRelease(note, noteDuration / 1000);
-                        
-                        // Esperar la duración de la nota antes de pasar a la siguiente
-                        await new Promise(resolve => setTimeout(resolve, noteDuration));
-                        
-                        // Quitar el resaltado después de la duración de la nota
-                        if (noteElement) noteElement.classList.remove('highlighted-note');
-                        if (formulaElement) formulaElement.classList.remove('highlighted-note');
-                    }
-                }
-
                 isPlaying = false;
             }
 
@@ -559,6 +541,35 @@
                     }
                     return sharpNotes[noteIndex];
                 }
+            }
+            
+            // Función para reproducir una secuencia de notas con Tone.js
+            async function playSequence(resId, notes, noteDuration) {
+                if (!synth) return;
+                
+                isPlaying = true;
+                
+                for (let i = 0; i < notes.length; i++) {
+                    const note = notes[i];
+                    
+                    // Resaltar la nota y la fórmula actual
+                    const noteElement = document.querySelector(`.note-name-${resId}-${i}`);
+                    const formulaElement = document.querySelector(`.formula-part-${resId}-${i}`);
+                    if (noteElement) noteElement.classList.add('highlighted-note');
+                    if (formulaElement) formulaElement.classList.add('highlighted-note');
+                    
+                    // Disparar la nota con Tone.js
+                    synth.triggerAttackRelease(note, noteDuration / 1000);
+                    
+                    // Esperar la duración de la nota antes de pasar a la siguiente
+                    await new Promise(resolve => setTimeout(resolve, noteDuration));
+                    
+                    // Quitar el resaltado después de la duración de la nota
+                    if (noteElement) noteElement.classList.remove('highlighted-note');
+                    if (formulaElement) formulaElement.classList.remove('highlighted-note');
+                }
+                
+                isPlaying = false;
             }
         });
     </script>
