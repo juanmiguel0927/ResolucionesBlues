@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resoluciones Blues</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluir la biblioteca Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         
@@ -96,7 +98,7 @@
         .resolution-button {
             width: 100%;
             padding: 0.5rem;
-            font-size: 0.8rem;
+            font-size: 1rem; /* Aumento del tamaño de fuente */
             font-weight: bold;
             display: flex;
             flex-direction: column;
@@ -119,7 +121,7 @@
             transform: scale(0.95);
         }
         .resolution-description {
-            font-size: 0.65rem;
+            font-size: 0.75rem; /* Aumento del tamaño de fuente */
             color: #BDBDBD;
             margin-top: 0.15rem;
             font-weight: normal;
@@ -131,7 +133,7 @@
             transition: color 0.1s ease-in-out;
         }
 
-        /* Estilos de cuadrícula para los botones (fijos para compatibilidad con GitHub Pages) */
+        /* Estilos de cuadrícula para los botones */
         .resolutions-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -213,9 +215,9 @@
     </div>
 
     <script>
-        // Inicializa el contexto de audio solo una vez
-        let audioContext;
-        let melodyOscillator;
+        // Declarar las variables globales para el sintetizador y los efectos de Tone.js
+        let synth;
+        let reverb;
         let isPlaying = false;
         
         // Frecuencias base para cada nota
@@ -229,7 +231,7 @@
             '1': 0, '2': 2, '#2': 3, 'b3': 3, '3': 4, '4': 5, '#4': 6, 'b5': 6, '5': 7, '6': 9, 'b7': 10
         };
 
-        // Arrays de nombres de notas para sostenidos y bemoles
+        // Nombres de notas para sostenidos y bemoles
         const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -253,9 +255,9 @@
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar el contexto de audio en la primera interacción del usuario
-            document.body.addEventListener('click', initAudioContext, { once: true });
-            document.body.addEventListener('touchstart', initAudioContext, { once: true });
+            // Inicializar Tone.js en la primera interacción del usuario
+            document.body.addEventListener('click', initTone, { once: true });
+            document.body.addEventListener('touchstart', initTone, { once: true });
             
             const chordTypeSelector = document.getElementById('chordType');
             const rootNoteSelector = document.getElementById('rootNote');
@@ -268,12 +270,32 @@
             bpmInput.addEventListener('change', updateUI);
             rhythmSelector.addEventListener('change', updateUI);
             
-            updateUI(); // Genera la UI inicial
+            updateUI(); // Generar la UI inicial
 
-            function initAudioContext() {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
+            function initTone() {
+                // Crear el sintetizador y los efectos
+                synth = new Tone.PolySynth(Tone.FMSynth, {
+                    oscillator: { type: "triangle" },
+                    envelope: {
+                        attack: 0.05,
+                        decay: 0.1,
+                        sustain: 0.3,
+                        release: 0.8
+                    }
+                }).toDestination();
+                
+                reverb = new Tone.Reverb({
+                    decay: 4,
+                    preDelay: 0.01,
+                    wet: 0.3 // Cantidad de efecto
+                }).toDestination();
+
+                // Conectar el sintetizador al reverb y el reverb a la salida
+                synth.connect(reverb);
+                reverb.toDestination();
+                
+                // Asegurar que el contexto de audio está activo
+                Tone.start();
             }
 
             function updateUI() {
@@ -304,11 +326,12 @@
                     
                     button.addEventListener('click', () => {
                         if (!isPlaying) {
-                            const freqs = resolution.formula.map(interval => getNoteFrequency(rootNote, interval));
+                            // Obtener los nombres de las notas en formato Tone.js (ej: 'C4', 'D#4')
+                            const notes = resolution.formula.map(interval => getNoteName(rootNote, interval) + '4');
                             const bpm = parseInt(bpmInput.value, 10);
                             const rhythmFactor = parseFloat(rhythmSelector.value);
                             const noteDuration = (60000 / bpm) * rhythmFactor;
-                            playSequence(freqs, noteDuration, resIndex);
+                            playSequence(notes, noteDuration, resIndex);
                         }
                     });
 
@@ -318,20 +341,15 @@
 
             // Función para obtener el nombre de la nota con sostenidos o bemoles
             function getNoteName(root, interval) {
-                const sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
                 const rootIndex = sharpNotes.indexOf(root);
                 const semitones = intervalSemitones[interval];
                 const noteIndex = (rootIndex + semitones + 12) % 12;
 
                 if (interval.includes('b')) {
-                    // Para bemoles, preferimos el nombre enharmónico con 'b'
-                    const flatNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
                     return flatNotes[noteIndex];
                 } else if (interval.includes('#')) {
-                    // Para sostenidos, preferimos el nombre enharmónico con '#'
                     return sharpNotes[noteIndex];
                 } else {
-                    // Lógica para el caso de '4' en F, G# y A# que deben ser bemoles
                     const flatNotesForNaturals = {
                         'F': 'Bb',
                         'G#': 'C#',
@@ -349,23 +367,15 @@
                     return sharpNotes[noteIndex];
                 }
             }
-
-
-            // Función para obtener la frecuencia de la nota
-            function getNoteFrequency(root, interval) {
-                const rootFreq = baseFrequencies[root];
-                const semitones = intervalSemitones[interval];
-                return rootFreq * Math.pow(2, semitones / 12);
-            }
-
-            // Función para reproducir una secuencia de notas
-            async function playSequence(freqs, noteDuration, resIndex) {
-                if (!audioContext || isPlaying) return;
+            
+            // Función para reproducir una secuencia de notas con Tone.js
+            async function playSequence(notes, noteDuration, resIndex) {
+                if (!synth || isPlaying) return;
                 
                 isPlaying = true;
                 
-                for (let i = 0; i < freqs.length; i++) {
-                    const freq = freqs[i];
+                for (let i = 0; i < notes.length; i++) {
+                    const note = notes[i];
                     
                     // Resaltar la nota y la fórmula actual
                     const noteElement = document.querySelector(`.note-name-${resIndex}-${i}`);
@@ -373,17 +383,10 @@
                     if (noteElement) noteElement.classList.add('highlighted-note');
                     if (formulaElement) formulaElement.classList.add('highlighted-note');
                     
-                    if (melodyOscillator) {
-                        melodyOscillator.stop();
-                        melodyOscillator.disconnect();
-                    }
-
-                    melodyOscillator = audioContext.createOscillator();
-                    melodyOscillator.type = 'sine';
-                    melodyOscillator.frequency.value = freq;
-                    melodyOscillator.connect(audioContext.destination);
-                    melodyOscillator.start();
-
+                    // Disparar la nota con Tone.js
+                    synth.triggerAttackRelease(note, noteDuration / 1000);
+                    
+                    // Esperar la duración de la nota antes de pasar a la siguiente
                     await new Promise(resolve => setTimeout(resolve, noteDuration));
                     
                     // Quitar el resaltado después de la duración de la nota
@@ -391,12 +394,6 @@
                     if (formulaElement) formulaElement.classList.remove('highlighted-note');
                 }
                 
-                if (melodyOscillator) {
-                    melodyOscillator.stop();
-                    melodyOscillator.disconnect();
-                    melodyOscillator = null;
-                }
-
                 isPlaying = false;
             }
         });
