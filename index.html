@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resoluciones Blues</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Include Tone.js for audio playback -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         
+        /* The main body is set to a specific background color and font, with flexbox to center content. */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0C1821;
@@ -18,15 +18,16 @@
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            padding: 0.5rem; /* Increased padding */
+            padding: 0.25rem;
             box-sizing: border-box;
-            overflow-y: auto;
-            font-size: 1.1rem; /* Base font size increased */
+            overflow: hidden; /* Prevent ALL scrolling, as per the user's request */
+            font-size: 0.9rem; /* Reduced base font size */
         }
         
+        /* The container now uses flexbox for vertical stacking and has no overflow */
         .container {
             background-color: #0C1821;
-            padding: 1rem; /* Increased padding */
+            padding: 0.25rem; /* Reduced padding */
             border-radius: 1rem;
             box-shadow: none; 
             width: 100%;
@@ -34,18 +35,26 @@
             border: none;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
+            overflow: hidden;
+            flex-grow: 1; /* Allow the container to grow and fill available space */
         }
-
+        
         h1 {
-            margin-bottom: 0.25rem;
-            font-size: 2.5rem; /* Font size increased */
+            margin-bottom: 0;
+            font-size: 1.75rem; /* Reduced font size */
         }
 
         .subtitle {
-            margin-bottom: 0.6rem;
-            font-size: 0.9rem; /* Font size increased */
+            margin-bottom: 0.1rem; 
+            font-size: 0.7rem; /* Reduced font size */
+        }
+        
+        .credits {
+            margin-top: 0.1rem; 
+            font-size: 0.6rem; /* Reduced font size */
+            color: #BDBDBD;
         }
         
         .controls-container {
@@ -54,15 +63,16 @@
             align-items: center;
             width: 100%;
             max-width: 300px;
-            margin-top: 1rem;
+            margin-top: 0.25rem; /* Reduced margin */
+            flex-shrink: 0; /* Prevent the controls from shrinking */
         }
 
         .controls-row {
             display: flex;
-            gap: 1.5rem;
+            gap: 0.25rem; /* Reduced gap */
             justify-content: center;
             align-items: center;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.1rem;
             width: 100%;
         }
 
@@ -70,35 +80,35 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.1rem; 
             width: 100%;
         }
 
         .select-label {
-            margin-bottom: 0.1rem;
+            margin-bottom: 0.05rem;
             font-weight: bold;
-            font-size: 1rem; /* Font size increased */
+            font-size: 0.75rem; /* Reduced font size */
         }
 
         .select-input {
             width: 100%;
-            padding: 0.5rem; /* Increased padding */
-            border-radius: 0.5rem;
+            padding: 0.15rem; /* Reduced padding */
+            border-radius: 0.4rem;
             background-color: #333;
             color: #E0E0E0;
             border: 1px solid #444;
             text-align: center;
-            font-size: 0.9rem; /* Font size increased */
+            font-size: 0.7rem; /* Reduced font size */
         }
         
         .action-button {
-            padding: 0.75rem 1.5rem; /* Increased padding */
-            font-size: 0.9rem; /* Font size increased */
+            padding: 0.4rem 0.8rem; /* Reduced padding */
+            font-size: 0.75rem; /* Reduced font size */
             font-weight: bold;
-            border-radius: 0.5rem;
+            border-radius: 0.4rem;
             cursor: pointer;
             transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
-            margin-top: 0.6rem;
+            margin-top: 0.25rem; /* Reduced margin */
         }
         
         .generate-button {
@@ -112,14 +122,14 @@
         
         .resolution-button {
             width: 100%;
-            padding: 0.75rem; /* Increased padding */
-            font-size: 1rem; /* Font size increased */
+            padding: 0.4rem; /* Reduced padding */
+            font-size: 0.7rem; /* Reduced font size */
             font-weight: bold;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: 0.5rem;
+            border-radius: 0.4rem;
             cursor: pointer;
             transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
             user-select: none;
@@ -143,9 +153,9 @@
         }
 
         .resolution-description {
-            font-size: 0.8rem; /* Font size increased */
+            font-size: 0.6rem; /* Reduced font size */
             color: #BDBDBD;
-            margin-top: 0.25rem;
+            margin-top: 0.1rem;
             font-weight: normal;
         }
         
@@ -164,59 +174,64 @@
             color: #333;
         }
         
+        /* New grid for resolutions to save space */
         .resolutions-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.6rem;
+            gap: 0.2rem; /* Reduced gap */
         }
         
         .selection-panel {
             background-color: #2C3E50;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            margin-top: 1rem;
+            border-radius: 0.4rem;
+            padding: 0.4rem; /* Reduced padding */
+            margin-top: 0.25rem; /* Reduced margin */
             width: 100%;
+            flex-shrink: 1; /* Allow this panel to shrink */
+            overflow-y: auto; /* Allow scrolling within the resolutions panel if needed */
         }
 
         .resolutions-section {
-            margin-top: 0.6rem;
+            margin-top: 0.15rem; /* Reduced margin */
         }
 
         .section-title {
-            font-size: 1rem; /* Font size increased */
+            font-size: 0.8rem; /* Reduced font size */
             font-weight: bold;
-            margin-bottom: 0.6rem;
-            padding-left: 0.25rem;
+            margin-bottom: 0.15rem; 
+            padding-left: 0.15rem;
         }
 
         .selection-panel-title {
-            font-size: 1.1rem; /* Font size increased */
+            font-size: 0.85rem; /* Reduced font size */
             font-weight: bold;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.15rem; 
         }
 
         .selection-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.4rem;
-            min-height: 2.5rem;
+            gap: 0.15rem; /* Reduced gap */
+            min-height: 0.8rem; /* Reduced height */
+            font-size: 0.7rem; /* Reduced font size */
         }
 
         .selected-item {
             background-color: #5D5D5D;
             color: #E0E0E0;
-            padding: 0.3rem 0.6rem;
-            border-radius: 0.25rem;
-            font-size: 0.9rem; /* Font size increased */
+            padding: 0.1rem 0.3rem; /* Reduced padding */
+            border-radius: 0.2rem;
+            font-size: 0.65rem; /* Reduced font size */
             transition: background-color 0.1s ease-in-out;
         }
 
         .action-buttons {
             display: flex;
-            gap: 0.8rem;
-            margin-top: 0.8rem;
+            gap: 0.25rem; /* Reduced gap */
+            margin-top: 0.25rem; /* Reduced margin */
             justify-content: center;
             width: 100%;
+            flex-shrink: 0; /* Prevent the action buttons from shrinking */
         }
         
         .play-button {
@@ -235,25 +250,29 @@
             background-color: #C0392B;
         }
 
-        .credits {
-            margin-top: 0.8rem;
-            font-size: 0.8rem;
-            color: #BDBDBD;
-        }
-
         .random-sequence-panel {
             background-color: #1A2430;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            margin-top: 1rem;
+            border-radius: 0.4rem;
+            padding: 0.4rem; /* Reduced padding */
+            margin-top: 0.25rem;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0; /* Prevent the random sequence panel from shrinking */
         }
 
         .random-sequence-notes {
-            font-size: 0.9rem; /* Font size increased */
+            font-size: 0.7rem; /* Reduced font size */
             font-weight: bold;
             text-align: center;
-            min-height: 2rem;
+            min-height: 0.8rem;
+            margin-bottom: 0.15rem;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.15rem;
         }
 
         .hidden {
@@ -263,16 +282,16 @@
         .custom-scale-mode-selector {
             display: flex;
             justify-content: center;
-            gap: 0.8rem;
-            margin-bottom: 0.8rem;
+            gap: 0.25rem; /* Reduced gap */
+            margin-bottom: 0.25rem;
         }
         
         .custom-mode-button {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.8rem;
+            padding: 0.1rem 0.4rem; /* Reduced padding */
+            font-size: 0.65rem; /* Reduced font size */
             background-color: #5D5D5D;
             color: white;
-            border-radius: 0.25rem;
+            border-radius: 0.2rem;
             cursor: pointer;
             border: 1px solid #444;
         }
@@ -286,16 +305,16 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 0.4rem;
-            margin-top: 0.8rem;
+            gap: 0.15rem; /* Reduced gap */
+            margin-top: 0.15rem;
         }
 
         .custom-interval-button, .chromatic-note-button {
             background-color: #5D5D5D;
             color: #E0E0E0;
-            padding: 0.6rem;
-            border-radius: 0.25rem;
-            font-size: 0.9rem;
+            padding: 0.3rem; /* Reduced padding */
+            border-radius: 0.2rem;
+            font-size: 0.65rem; /* Reduced font size */
             text-align: center;
             cursor: pointer;
             transition: background-color 0.1s ease-in-out;
@@ -309,13 +328,7 @@
             background-color: #3498DB;
             color: white;
             width: 100%;
-            margin-top: 0.6rem;
-        }
-
-        @media (min-width: 640px) {
-            .resolutions-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            margin-top: 0.25rem;
         }
     </style>
 </head>
@@ -326,16 +339,26 @@
         <p class="text-center text-gray-400 subtitle">
             Selecciona una escala, genera una melodía aleatoria y añade resoluciones.
         </p>
+        <p class="text-center credits">Diseñado por Juan Miguel Ríos Redondo</p>
         
         <div class="controls-container">
-            <div class="controls">
-                <label for="scaleSelect" class="select-label">Escala:</label>
-                <select id="scaleSelect" class="select-input">
-                    <option value="Mayor">Mayor</option>
-                    <option value="Menor">Menor</option>
-                    <option value="Personalizada">Personalizada</option>
-                </select>
+            <div class="controls-row">
+                <div class="controls">
+                    <label for="scaleSelect" class="select-label">Escala:</label>
+                    <select id="scaleSelect" class="select-input">
+                        <option value="Mayor">Mayor</option>
+                        <option value="Menor">Menor</option>
+                        <option value="Personalizada">Personalizada</option>
+                    </select>
+                </div>
+                <div class="controls">
+                    <label for="rootNote" class="select-label">Fundamental:</label>
+                    <select id="rootNote" class="select-input">
+                        <!-- Options are now dynamically generated by JS -->
+                    </select>
+                </div>
             </div>
+            
             <div id="customScaleInputContainer" class="controls hidden">
                 <div class="custom-scale-mode-selector">
                     <button id="formulaModeButton" class="custom-mode-button active">Fórmula</button>
@@ -348,19 +371,10 @@
                     <!-- Chromatic note buttons will be generated by JavaScript -->
                 </div>
             </div>
-            <div class="controls">
-                <label for="rootNote" class="select-label">Fundamental:</label>
-                <select id="rootNote" class="select-input">
-                    <!-- Options are now dynamically generated by JS -->
-                </select>
-            </div>
-             <div class="controls">
-                <button id="enharmonicToggleButton" class="action-button play-button">Mostrar Bemoles (b)</button>
-            </div>
+            
             <div class="controls-row">
                 <div class="controls">
                     <label for="bpm" class="select-label">BPM:</label>
-                    <!-- Default BPM set to 160 as requested -->
                     <input type="number" id="bpm" class="select-input" value="160" min="40" max="240">
                 </div>
                 <div class="controls">
@@ -372,17 +386,22 @@
                     </select>
                 </div>
             </div>
-             <div class="controls">
-                <label for="numNotesSelect" class="select-label">Cantidad de Notas Aleatorias (1-7):</label>
-                <select id="numNotesSelect" class="select-input">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5" selected>5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                </select>
+            <div class="controls-row">
+                 <div class="controls">
+                    <label for="numNotesSelect" class="select-label">Notas Aleatorias (1-7):</label>
+                    <select id="numNotesSelect" class="select-input">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                    </select>
+                </div>
+                <div class="controls">
+                    <button id="enharmonicToggleButton" class="action-button play-button">Mostrar Bemoles (b)</button>
+                </div>
             </div>
         </div>
 
@@ -391,16 +410,8 @@
         </div>
         
         <div class="random-sequence-panel">
-            <div class="selection-panel-title">Secuencia Aleatoria:</div>
-            <div id="random-sequence-display" class="random-sequence-notes">Genera una secuencia aleatoria para empezar</div>
+            <div id="random-sequence-display" class="random-sequence-notes"></div>
         </div>
-
-        <!-- NEW BUTTONS CONTAINER FOR PLAY AND CLEAR -->
-        <div class="action-buttons">
-            <button id="play-combination-button" class="action-button play-button">Reproducir</button>
-            <button id="clear-selection-button" class="action-button clear-button">Limpiar Todo</button>
-        </div>
-        <!-- END OF NEW BUTTONS CONTAINER -->
 
         <div class="selection-panel">
             <div class="selection-panel-title">Resoluciones Blues:</div>
@@ -424,8 +435,12 @@
                 <!-- Notes of the final combination will be displayed here -->
             </div>
         </div>
+        
+        <div class="action-buttons">
+            <button id="play-combination-button" class="action-button play-button">Reproducir</button>
+            <button id="clear-selection-button" class="action-button clear-button">Limpiar Todo</button>
+        </div>
 
-        <p class="text-center credits">Diseñado por Juan Miguel Ríos Redondo</p>
     </div>
 
     <script>
@@ -905,7 +920,7 @@
             // Update the display of the random sequence notes
             function updateRandomSequenceDisplay() {
                 if (randomSequence.length === 0) {
-                    randomSequenceDisplay.textContent = 'Genera una secuencia aleatoria para empezar';
+                    randomSequenceDisplay.textContent = 'Genera una secuencia...'; // Clear text
                     return;
                 }
                 const rootNoteCanonical = rootNoteSelector.value;
@@ -955,7 +970,7 @@
                 if (finalSequenceDisplay.length > 0) {
                     finalCombinationList.innerHTML = finalSequenceDisplay.map((seqNote, index) => 
                         `<span class="selected-item final-note-${index}">${seqNote.note}</span>`
-                    ).join('');
+                    ).join(' ');
                 } else {
                     finalCombinationList.innerHTML = '<span class="selected-item">Vacío</span>';
                 }
