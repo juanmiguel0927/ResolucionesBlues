@@ -7,1115 +7,924 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
+        /* Importa la fuente Inter de Google Fonts para una apariencia moderna */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         
-        /* The main body is set to a specific background color and font, with flexbox to center content. */
+        /* Estilos base para el cuerpo de la página */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0C1821;
             color: #E0E0E0;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            padding: 0.1rem;
+            align-items: center;
+            padding: 1rem;
             box-sizing: border-box;
-            font-size: 0.8rem; /* Reduced base font size */
+            min-height: 100vh;
         }
 
-        /* The container now has a smaller padding and margin to fit all content */
+        /* Contenedor principal para toda la aplicación */
         .container {
-            background-color: #0C1821;
-            padding: 0.25rem; /* Reduced padding */
-            border-radius: 1rem;
-            box-shadow: none; 
+            background-color: #121E2A;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 600px;
-            border: none;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            flex-grow: 1; 
+            gap: 1rem;
         }
 
-        /* This container will hold all the content and allow scrolling if necessary, but is now more compact */
-        .scrollable-content {
-            flex-grow: 1;
-            overflow-y: auto; 
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 0.5rem; /* Reduced padding at the bottom */
-        }
-        
+        /* Estilo para el título principal */
         h1 {
-            margin-bottom: 0;
-            font-size: 1.5rem; /* Reduced font size */
+            font-size: 12rem; /* Tamaño del primer análisis */
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+            color: #FFFFFF;
         }
 
+        /* Estilo para el subtítulo y los créditos */
         .subtitle {
-            margin-bottom: 0.1rem; 
-            font-size: 0.6rem; /* Reduced font size */
+            font-size: 0.875rem; /* Tamaño del primer análisis */
+            color: #A0A0A0;
+            text-align: center;
+            margin-top: 0;
         }
         
         .credits {
-            margin-top: 0.1rem; 
-            font-size: 0.5rem; /* Reduced font size */
-            color: #BDBDBD;
+            font-size: 0.75rem; /* Tamaño del primer análisis */
+            color: #707070;
+            text-align: center;
+            margin-top: 0.25rem;
+        }
+
+        /* Estilo general para los paneles de control y selección */
+        .panel {
+            background-color: #1A2430;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
         
-        .controls-container {
+        /* Ajuste para el grid, permitiendo que los elementos se adapten */
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+        }
+        
+        .input-group {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 300px;
-            margin-top: 0.25rem; /* Reduced margin */
-            flex-shrink: 0;
-        }
-
-        .controls-row {
-            display: flex;
-            gap: 0.2rem; /* Reduced gap */
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 0.1rem;
             width: 100%;
         }
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 0.1rem; 
-            width: 100%;
+        
+        .input-label {
+            font-weight: 600;
+            font-size: 0.875rem; /* Tamaño del primer análisis */
+            margin-bottom: 0.25rem;
+            text-align: center;
         }
 
-        .select-label {
-            margin-bottom: 0.05rem;
-            font-weight: bold;
-            font-size: 0.7rem; /* Reduced font size */
-        }
-
-        .select-input {
+        .select-input, .text-input {
             width: 100%;
-            padding: 0.1rem; /* Reduced padding */
-            border-radius: 0.3rem;
-            background-color: #333;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: #2C3E50;
             color: #E0E0E0;
             border: 1px solid #444;
-            text-align: center;
-            font-size: 0.65rem; /* Reduced font size */
+            font-size: 0.875rem; /* Tamaño del primer análisis */
+        }
+
+        /* Estilo para los botones de acción principales */
+        .action-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem; /* Tamaño del primer análisis */
+            font-weight: 700;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: none;
         }
         
-        .action-button {
-            padding: 0.3rem 0.6rem; /* Reduced padding */
-            font-size: 0.7rem; /* Reduced font size */
-            font-weight: bold;
-            border-radius: 0.3rem;
-            cursor: pointer;
-            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
-            margin-top: 0.2rem; /* Reduced margin */
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .action-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .generate-button {
             background-color: #F39C12;
             color: white;
-            width: 100%;
-        }
-        .generate-button:hover {
-            background-color: #E67E22;
-        }
-        
-        .resolution-button {
-            width: 100%;
-            padding: 0.3rem; /* Reduced padding */
-            font-size: 0.65rem; /* Reduced font size */
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 0.3rem;
-            cursor: pointer;
-            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
-            user-select: none;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-            background-color: #1E8449;
-            color: white;
-            border: none;
-            text-align: center;
-        }
-        .resolution-button:hover {
-            background-color: #27AE60;
-        }
-        .resolution-button:active {
-            transform: scale(0.95);
-        }
-        
-        .resolution-button.selected {
-            background-color: #F1C40F;
-            color: #0C1821;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
-        }
-
-        .resolution-description {
-            font-size: 0.7rem; /* Aumentado el tamaño de la fuente */
-            color: #BDBDBD;
-            margin-top: 0.1rem;
-            font-weight: normal;
-        }
-        
-        .highlighted-note {
-            color: #F1C40F;
-            font-weight: bold;
-            transition: color 0.1s ease-in-out;
-        }
-
-        .highlighted-item {
-            background-color: #3498DB !important;
-            transition: background-color 0.1s ease-in-out;
-        }
-
-        .resolution-button.selected .resolution-description {
-            color: #333;
-        }
-        
-        /* New grid for resolutions to save space */
-        .resolutions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.15rem; /* Reduced gap */
-        }
-        
-        .selection-panel {
-            background-color: #2C3E50;
-            border-radius: 0.3rem;
-            padding: 0.3rem; /* Reduced padding */
-            margin-top: 0.2rem; /* Reduced margin */
-            width: 100%;
-            flex-shrink: 1;
-        }
-
-        .resolutions-section {
-            margin-top: 0.1rem; /* Reduced margin */
-        }
-
-        .section-title {
-            font-size: 0.75rem; /* Reduced font size */
-            font-weight: bold;
-            margin-bottom: 0.1rem; 
-            padding-left: 0.1rem;
-        }
-
-        .selection-panel-title {
-            font-size: 0.8rem; /* Reduced font size */
-            font-weight: bold;
-            margin-bottom: 0.1rem; 
-        }
-
-        .selection-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.1rem; /* Reduced gap */
-            min-height: 0.7rem; /* Reduced height */
-            font-size: 0.75rem; 
-        }
-
-        .selected-item {
-            background-color: #5D5D5D;
-            color: #E0E0E0;
-            padding: 0.05rem 0.2rem; /* Reduced padding */
-            border-radius: 0.15rem;
-            font-size: 0.75rem;
-            transition: background-color 0.1s ease-in-out;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.2rem; /* Reduced gap */
-            padding: 0.25rem;
-            justify-content: center;
-            box-sizing: border-box;
-            width: 100%;
+            flex-grow: 1;
         }
 
         .play-button {
             background-color: #3498DB;
             color: white;
+            flex-grow: 1;
         }
-        .play-button:hover {
-            background-color: #2980B9;
+        
+        .stop-button {
+            background-color: #E74C3C;
+            color: white;
+            flex-grow: 1;
         }
 
         .clear-button {
             background-color: #E74C3C;
             color: white;
-        }
-        .clear-button:hover {
-            background-color: #C0392B;
+            flex-grow: 1;
         }
 
-        .random-sequence-panel {
-            background-color: #1A2430;
-            border-radius: 0.3rem;
-            padding: 0.3rem; /* Reduced padding */
-            margin-top: 0.2rem;
+        /* Estilo para los botones de resolución */
+        .resolution-button {
             width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem; /* Tamaño del primer análisis */
+            font-weight: 600;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            flex-shrink: 0; 
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #1E8449;
+            color: white;
+            border: none;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .resolution-button:hover {
+            background-color: #27AE60;
+        }
+        .resolution-button:active {
+            transform: scale(0.98);
+        }
+        
+        .resolution-button.selected {
+            background-color: #F1C40F;
+            color: #0C1821;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Se alumbra la nota y la formula con el mismo color */
+        .resolution-button.selected .note-to-highlight,
+        .resolution-button.selected .formula-part {
+            color: #3498DB; /* El color azul resalta */
+            font-weight: bold;
+        }
+        
+        /* ESTILO CORREGIDO: Resalta la nota individualmente cuando se está reproduciendo */
+        .note-to-highlight.playing-note,
+        .formula-part.playing-note {
+            color: #3498DB; /* Color azul para un alto contraste */
+            transform: scale(1.1);
+            transition: all 0.2s ease-in-out;
         }
 
-        .random-sequence-notes {
-            font-size: 0.75rem; /* Reduced font size */
+
+        .resolution-description {
+            font-size: 0.75rem; /* Tamaño del primer análisis */
+            color: #BDBDBD;
+            margin-top: 0.25rem;
+            font-weight: normal;
+        }
+
+        /* Asegura que el texto de la nota sea visible y negrita */
+        .note-to-highlight {
+            color: #E0E0E0;
             font-weight: bold;
+        }
+        
+        /* Aplica el mismo estilo de las notas a los números de la fórmula */
+        .formula-part {
+            color: #E0E0E0;
+            font-weight: bold;
+        }
+
+        /* Estilo para el panel de la combinación final */
+        .final-combination-panel {
+            background-color: #2C3E50;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-height: 4rem;
+        }
+
+        .section-title {
+            font-size: 0.875rem; /* Tamaño del primer análisis */
+            font-weight: 600;
+            color: #A0A0A0;
+            margin-bottom: 0.5rem;
             text-align: center;
-            min-height: 0.75rem;
-            margin-bottom: 0.1rem;
-            width: 100%;
+        }
+
+        .notes-display-grid {
             display: flex;
             flex-wrap: wrap;
+            gap: 0.5rem;
             justify-content: center;
-            gap: 0.1rem;
+            align-items: center;
         }
 
+        .note-item {
+            background-color: #5D5D5D;
+            color: #E0E0E0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem; /* Tamaño del primer análisis */
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        
+        .note-item:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ESTILO CORREGIDO: Resalta la nota cuando se reproduce */
+        .note-item.playing {
+            background-color: #3498DB;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* Oculta un elemento */
         .hidden {
             display: none;
         }
-
-        .custom-scale-mode-selector {
-            display: flex;
-            justify-content: center;
-            gap: 0.2rem; /* Reduced gap */
-            margin-bottom: 0.2rem;
-        }
         
-        .custom-mode-button {
-            padding: 0.05rem 0.2rem; /* Reduced padding */
-            font-size: 0.6rem; /* Reduced font size */
-            background-color: #5D5D5D;
-            color: white;
-            border-radius: 0.15rem;
-            cursor: pointer;
-            border: 1px solid #444;
-        }
-
-        .custom-mode-button.active {
-            background-color: #F39C12;
-            color: #0C1821;
-        }
-        
-        .custom-intervals-grid, .chromatic-notes-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.1rem; /* Reduced gap */
-            margin-top: 0.1rem;
-        }
-
-        .custom-interval-button, .chromatic-note-button {
-            background-color: #5D5D5D;
-            color: #E0E0E0;
-            padding: 0.2rem; /* Reduced padding */
-            border-radius: 0.15rem;
-            font-size: 0.6rem; /* Reduced font size */
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.1s ease-in-out;
-        }
-
-        .custom-interval-button.selected-interval, .chromatic-note-button.selected-note {
-            background-color: #27AE60;
-        }
-
-        .toggle-random-button {
-            background-color: #3498DB;
-            color: white;
+        /* Estilos para el slider de BPM */
+        input[type=range] {
+            -webkit-appearance: none;
             width: 100%;
-            margin-top: 0.2rem;
+            height: 8px;
+            background: #2C3E50;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498DB;
+            cursor: pointer;
+        }
+        
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498DB;
+            cursor: pointer;
+        }
+
+        /* Grid para las resoluciones */
+        .resolutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.5rem;
+        }
+
+        /* Contraste para los botones de modo de escala personalizada */
+        .mode-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #444444; /* Color de fondo por defecto */
+            color: #E0E0E0; /* Color de texto por defecto */
+            border: none;
+        }
+
+        .mode-button.selected {
+            background-color: #3498DB; /* Color de fondo azul cuando está seleccionado */
+            color: white; /* Color de texto blanco para un alto contraste */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
-    <div class="container mx-auto rounded-xl">
-        <div class="scrollable-content">
-            <h1 class="text-3xl font-bold text-center">Resoluciones Blues</h1>
-            <p class="text-center text-gray-400 subtitle">
-                Selecciona una escala, genera una melodía aleatoria y añade resoluciones.
-            </p>
-            <p class="text-center credits">Diseñado por Juan Miguel Ríos Redondo</p>
-            
-            <div class="controls-container">
-                <div class="controls-row">
-                    <div class="controls">
-                        <label for="scaleSelect" class="select-label">Escala:</label>
-                        <select id="scaleSelect" class="select-input">
-                            <option value="Mayor">Mayor</option>
-                            <option value="Menor">Menor</option>
-                            <option value="Personalizada">Personalizada</option>
-                        </select>
-                    </div>
-                    <div class="controls">
-                        <label for="rootNote" class="select-label">Fundamental:</label>
-                        <select id="rootNote" class="select-input">
-                            <!-- Options are now dynamically generated by JS -->
-                        </select>
-                    </div>
+    <div class="container mx-auto">
+        <h1>Resoluciones Blues</h1>
+        <p class="subtitle">
+            Crea melodías combinando notas aleatorias y resoluciones.
+        </p>
+        <p class="credits">Diseñado por Juan Miguel Ríos Redondo</p>
+        
+        <!-- Panel de Controles Principales -->
+        <div class="panel">
+            <div class="panel-grid">
+                <div class="input-group">
+                    <label for="scaleSelect" class="input-label">Escala:</label>
+                    <select id="scaleSelect" class="select-input">
+                        <option value="Major">Mayor</option>
+                        <option value="Minor">Menor</option>
+                        <option value="Custom">Personalizada</option>
+                    </select>
                 </div>
-                
-                <div id="customScaleInputContainer" class="controls hidden">
-                    <div class="custom-scale-mode-selector">
-                        <button id="formulaModeButton" class="custom-mode-button active">Fórmula</button>
-                        <button id="notesModeButton" class="custom-mode-button">Notas</button>
-                    </div>
-                    <div id="intervalGrid" class="custom-intervals-grid">
-                        <!-- Interval buttons will be generated by JavaScript -->
-                    </div>
-                    <div id="chromaticNotesGrid" class="chromatic-notes-grid hidden">
-                        <!-- Chromatic note buttons will be generated by JavaScript -->
-                    </div>
+                <div class="input-group">
+                    <label for="rootNote" class="input-label">Fundamental:</label>
+                    <select id="rootNote" class="select-input"></select>
                 </div>
-                
-                <div class="controls-row">
-                    <div class="controls">
-                        <label for="bpm" class="select-label">BPM:</label>
-                        <input type="number" id="bpm" class="select-input" value="160" min="40" max="240">
-                    </div>
-                    <div class="controls">
-                        <label for="rhythm" class="select-label">Ritmo:</label>
-                        <select id="rhythm" class="select-input">
-                            <option value="1">Negra</option>
-                            <option value="0.5" selected>Corchea</option>
-                            <option value="0.25">Semicorchea</option>
-                        </select>
-                    </div>
+                <div class="input-group">
+                    <label for="bpm" class="input-label">BPM: <span id="bpmValue">160</span></label>
+                    <input type="range" id="bpm" class="text-input" value="160" min="40" max="240">
                 </div>
-                <div class="controls-row">
-                     <div class="controls">
-                        <label for="numNotesSelect" class="select-label">Notas Aleatorias (1-7):</label>
-                        <select id="numNotesSelect" class="select-input">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5" selected>5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                        </select>
-                    </div>
-                    <div class="controls">
-                        <button id="enharmonicToggleButton" class="action-button play-button">Mostrar Bemoles (b)</button>
-                    </div>
+                <div class="input-group">
+                    <label for="rhythm" class="input-label">Ritmo:</label>
+                    <select id="rhythm" class="select-input">
+                        <option value="1">Negra</option>
+                        <option value="0.5" selected>Corchea</option>
+                        <option value="0.25">Semicorchea</option>
+                    </select>
                 </div>
-            </div>
-
-            <div class="action-buttons">
-                <button id="generate-sequence-button" class="action-button generate-button">Generar Secuencia Aleatoria</button>
+                <div class="input-group">
+                    <label class="input-label">Armónicos:</label>
+                    <button id="enharmonicToggleButton" class="action-button bg-blue-500 w-full mt-1">Mostrar Bemoles (b)</button>
+                </div>
+                <div class="input-group">
+                    <label for="numNotesSelect" class="input-label">Notas Aleatorias (1-7):</label>
+                    <select id="numNotesSelect" class="select-input">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="random-sequence-panel">
-                <div id="random-sequence-display" class="random-sequence-notes"></div>
-            </div>
-
-            <div class="selection-panel">
-                <div class="selection-panel-title">Resoluciones Blues:</div>
-                <div class="resolutions-section">
-                    <p class="section-title">Mayores y Dominantes</p>
-                    <div id="major-resolutions-panel" class="resolutions-grid">
-                        <!-- Buttons will be generated by JavaScript -->
-                    </div>
-                </div>
-                <div class="resolutions-section">
-                    <p class="section-title">Menores</p>
-                    <div id="minor-resolutions-panel" class="resolutions-grid">
-                        <!-- Buttons will be generated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="selection-panel">
-                <div class="selection-panel-title">Combinación Final:</div>
-                <div id="final-combination-list" class="selection-list">
-                    <!-- Notes of the final combination will be displayed here -->
-                </div>
-            </div>
-
-            <div class="action-buttons">
+            <!-- Botones de acción agrupados y centrados -->
+            <div class="flex justify-center gap-2 w-full mt-4">
+                <button id="generate-sequence-button" class="action-button generate-button">Generar Secuencia</button>
                 <button id="play-combination-button" class="action-button play-button">Reproducir</button>
+                <button id="stop-button" class="action-button stop-button hidden">Detener</button>
                 <button id="clear-selection-button" class="action-button clear-button">Limpiar Todo</button>
+            </div>
+            
+            <!-- Controles para la Escala Personalizada -->
+            <div id="customScaleInputContainer" class="hidden flex-col gap-2">
+                <div class="flex justify-center gap-2">
+                    <!-- Botones que se resaltan al seleccionar con mayor contraste -->
+                    <button id="formulaModeButton" class="mode-button">Fórmula</button>
+                    <button id="notesModeButton" class="mode-button">Notas</button>
+                </div>
+                <div id="intervalGrid" class="notes-display-grid"></div>
+                <div id="chromaticNotesGrid" class="notes-display-grid hidden"></div>
+            </div>
+        </div>
+        
+        <!-- Panel de Resoluciones Mayores -->
+        <div class="panel">
+            <span class="section-title">Resoluciones Mayores:</span>
+            <div class="resolutions-grid" id="major-resolutions-panel"></div>
+        </div>
+
+        <!-- Panel de Resoluciones Menores -->
+        <div class="panel">
+            <span class="section-title">Resoluciones Menores:</span>
+            <div class="resolutions-grid" id="minor-resolutions-panel"></div>
+        </div>
+
+        <!-- Panel de Combinación Final -->
+        <div class="final-combination-panel">
+            <span class="section-title">Combinación Final:</span>
+            <div id="final-combination-list" class="notes-display-grid">
+                <span class="note-item">Vacío</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables for Tone.js synth and effects
-        let synth;
-        let reverb;
-        let isPlaying = false;
-        
-        // Arrays to store the note sequences
-        let randomSequence = [];
-        let selectedResolutions = [];
-        
-        // State for the custom scale input mode and enharmonic display
-        let customScaleMode = 'formula'; // 'formula' or 'notes'
-        let isFlatMode = false;
-        
-        // Mapping intervals to semitones from the root note
-        const intervalSemitones = {
-            '1': 0, '2': 2, 'b2': 1, '#2': 3, 'bb3': 2, 'b3': 3, '3': 4, '4': 5, '#4': 6, 'b5': 6, '5': 7, '#5': 8, 'b6': 8, '6': 9, 'b7': 10, '7': 11, 'bb7': 9, '#9': 4, '#13': 9
-        };
+        // Objeto principal que maneja el estado de la aplicación y la lógica
+        const App = {
+            // Estado de la aplicación
+            state: {
+                synth: null,
+                isPlaying: false,
+                randomSequence: [],
+                selectedResolutions: [],
+                customScaleMode: 'formula',
+                isFlatMode: false
+            },
 
-        // Mapping semitones to standard interval names (now more flexible)
-        const semitoneToInterval = {
-            0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7'
-        };
-        
-        // Internal canonical chromatic notes for calculations
-        const chromaticNotesCanonical = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            // Datos de las escalas y resoluciones
+            data: {
+                intervalSemitones: {
+                    '1': 0, 'b2': 1, '2': 2, 'b3': 3, '3': 4, '4': 5, 'b5': 6, '5': 7, '#5': 8, 'b6': 8, '6': 9, 'b7': 10, '7': 11, '#2': 3, '#4': 6, '#9': 4, '#13': 9
+                },
+                chromaticNotesCanonical: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+                scalesData: {
+                    'Major': ['1', '2', '3', '4', '5', '6', '7'],
+                    'Minor': ['1', '2', 'b3', '4', '5', 'b6', 'b7']
+                },
+                resolutionsMajor: [
+                    { id: 'major-0', name: 'Resolución de #2', formula: ['#2', '3', '1'] },
+                    { id: 'major-1', name: 'Resolución de b3', formula: ['b3', '2', '1'] },
+                    { id: 'major-2', name: 'Resolución de 4', formula: ['4', '#2', '3', '1'] },
+                    { id: 'major-3', name: 'Resolución de #4', formula: ['3', '4', '#4', '5', '#2', '3', '1'] },
+                    { id: 'major-4', name: 'Resolución de b5', formula: ['b5', '4', '#2', '3', '1'] },
+                    { id: 'major-5', name: 'Resolución de b7 versión 1', formula: ['b7', '5'] },
+                    { id: 'major-6', name: 'Resolución de b7 versión 2', formula: ['b7', '6', '5'] },
+                ],
+                resolutionsMinor: [
+                    { id: 'minor-0', name: 'Resolución de 2', formula: ['2', 'b3', '1'] },
+                    { id: 'minor-1', name: 'Resolución de b5', formula: ['b5', '5', 'b3'] },
+                    { id: 'minor-2', name: 'Resolución de b7', formula: ['b7', '6', '5', 'b3'] },
+                    { id: 'minor-3', name: 'Resolución de 6', formula: ['6', 'b7', 'b3'] },
+                ],
+                enharmonicNames: {
+                    'C': { sharp: 'C', flat: 'C' },
+                    'C#': { sharp: 'C#', flat: 'Db' },
+                    'D': { sharp: 'D', flat: 'D' },
+                    'D#': { sharp: 'D#', flat: 'Eb' },
+                    'E': { sharp: 'E', flat: 'E' },
+                    'F': { sharp: 'F', flat: 'F' },
+                    'F#': { sharp: 'F#', flat: 'Gb' },
+                    'G': { sharp: 'G', flat: 'G' },
+                    'G#': { sharp: 'G#', flat: 'Ab' },
+                    'A': { sharp: 'A', flat: 'A' },
+                    'A#': { sharp: 'A#', flat: 'Bb' },
+                    'B': { sharp: 'B', flat: 'B' }
+                },
+                allIntervals: ['1', 'b2', '2', '#2', 'b3', '3', '4', '#4', 'b5', '5', '#5', 'b6', '6', 'b7', '7']
+            },
 
-        // Note names for sharps and flats, used for display. We need to define these for our corrected logic.
-        const noteNames = {
-            'C': { flat: 'C', sharp: 'C' },
-            'C#': { flat: 'Db', sharp: 'C#' },
-            'D': { flat: 'D', sharp: 'D' },
-            'D#': { flat: 'Eb', sharp: 'D#' },
-            'E': { flat: 'E', sharp: 'E' },
-            'F': { flat: 'F', sharp: 'F' },
-            'F#': { flat: 'Gb', sharp: 'F#' },
-            'G': { flat: 'G', sharp: 'G' },
-            'G#': { flat: 'Ab', sharp: 'G#' },
-            'A': { flat: 'A', sharp: 'A' },
-            'A#': { flat: 'Bb', sharp: 'A#' },
-            'B': { flat: 'B', sharp: 'B' }
-        };
+            // Elementos del DOM
+            elements: {
+                scaleSelect: document.getElementById('scaleSelect'),
+                customScaleInputContainer: document.getElementById('customScaleInputContainer'),
+                rootNoteSelector: document.getElementById('rootNote'),
+                enharmonicToggleButton: document.getElementById('enharmonicToggleButton'),
+                numNotesSelect: document.getElementById('numNotesSelect'),
+                bpmInput: document.getElementById('bpm'),
+                bpmValue: document.getElementById('bpmValue'),
+                rhythmSelector: document.getElementById('rhythm'),
+                generateButton: document.getElementById('generate-sequence-button'),
+                majorResolutionsPanel: document.getElementById('major-resolutions-panel'),
+                minorResolutionsPanel: document.getElementById('minor-resolutions-panel'),
+                playButton: document.getElementById('play-combination-button'),
+                stopButton: document.getElementById('stop-button'),
+                clearButton: document.getElementById('clear-selection-button'),
+                finalCombinationList: document.getElementById('final-combination-list'),
+                formulaModeButton: document.getElementById('formulaModeButton'),
+                notesModeButton: document.getElementById('notesModeButton'),
+                intervalGrid: document.getElementById('intervalGrid'),
+                chromaticNotesGrid: document.getElementById('chromaticNotesGrid')
+            },
 
-        // All intervals for the custom scale selector
-        const allIntervals = ['1', 'b2', '2', '#2', 'b3', '3', '4', '#4', 'b5', '5', '#5', 'b6', '6', 'b7', '7'];
+            // Inicializa la aplicación
+            init: function() {
+                this.bindEvents();
+                this.updateRootNoteSelector();
+                this.generateIntervalsUI();
+                this.generateChromaticNotesUI();
+                this.updateUI();
+                this.setCustomScaleMode('formula'); // Establece el modo inicial
+            },
 
-        // Scale data with simple names
-        const scalesData = {
-            'Mayor': ['1', '2', '3', '4', '5', '6', '7'],
-            'Menor': ['1', '2', 'b3', '4', '5', 'b6', 'b7'] // Eólico
-        };
+            // Asigna los oyentes de eventos
+            bindEvents: function() {
+                const elements = this.elements;
+                elements.scaleSelect.addEventListener('change', this.handleScaleSelectChange.bind(this));
+                elements.rootNoteSelector.addEventListener('change', this.updateUI.bind(this));
+                elements.enharmonicToggleButton.addEventListener('click', this.toggleEnharmonicMode.bind(this));
+                elements.generateButton.addEventListener('click', this.generateSequence.bind(this));
+                elements.majorResolutionsPanel.addEventListener('click', this.handleResolutionClick.bind(this));
+                elements.minorResolutionsPanel.addEventListener('click', this.handleResolutionClick.bind(this));
+                elements.playButton.addEventListener('click', this.playCombinedSequence.bind(this));
+                elements.stopButton.addEventListener('click', this.stopPlayback.bind(this));
+                elements.clearButton.addEventListener('click', this.clearAll.bind(this));
+                elements.finalCombinationList.addEventListener('click', this.handleFinalCombinationClick.bind(this));
+                elements.formulaModeButton.addEventListener('click', () => this.setCustomScaleMode('formula'));
+                elements.notesModeButton.addEventListener('click', () => this.setCustomScaleMode('notes'));
+                elements.bpmInput.addEventListener('input', (event) => {
+                    elements.bpmValue.textContent = event.target.value;
+                });
+            },
 
-        // Resolutions for major and dominant chords
-        const resolutionsMajor = [
-            { id: 'major-0', name: 'Resolución de #2', formula: ['#2', '3', '1'] },
-            { id: 'major-1', name: 'Resolución de b3', formula: ['b3', '2', '1'] },
-            { id: 'major-2', name: 'Resolución de 4', formula: ['4', '#2', '3', '1'] },
-            { id: 'major-3', name: 'Resolución de #4', formula: ['3', '4', '#4', '5', '#2', '3', '1'] },
-            { id: 'major-4', name: 'Resolución de b5', formula: ['b5', '4', '#2', '3', '1'] },
-            { id: 'major-5', name: 'Resolución de b7 versión 1', formula: ['b7', '5'] },
-            { id: 'major-6', name: 'Resolución de b7 versión 2', formula: ['b7', '6', '5'] },
-        ];
-        
-        // Resolutions for minor chords
-        const resolutionsMinor = [
-            { id: 'minor-0', name: 'Resolución de 2', formula: ['2', 'b3', '1'] },
-            { id: 'minor-1', name: 'Resolución de b5', formula: ['b5', '5', 'b3'] },
-            { id: 'minor-2', name: 'Resolución de b7', formula: ['b7', '6', '5', 'b3'] },
-            { id: 'minor-3', name: 'Resolución de 6', formula: ['6', 'b7', 'b3'] },
-        ];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Get references to all UI elements
-            const scaleSelect = document.getElementById('scaleSelect');
-            const customScaleInputContainer = document.getElementById('customScaleInputContainer');
-            const rootNoteSelector = document.getElementById('rootNote');
-            const enharmonicToggleButton = document.getElementById('enharmonicToggleButton');
-            const numNotesSelect = document.getElementById('numNotesSelect');
-            const bpmInput = document.getElementById('bpm');
-            const rhythmSelector = document.getElementById('rhythm');
-            const generateButton = document.getElementById('generate-sequence-button');
-            const majorResolutionsPanel = document.getElementById('major-resolutions-panel');
-            const minorResolutionsPanel = document.getElementById('minor-resolutions-panel');
-            const playButton = document.getElementById('play-combination-button');
-            const clearButton = document.getElementById('clear-selection-button');
-            const randomSequenceDisplay = document.getElementById('random-sequence-display');
-            const finalCombinationList = document.getElementById('final-combination-list');
-            const formulaModeButton = document.getElementById('formulaModeButton');
-            const notesModeButton = document.getElementById('notesModeButton');
-            const intervalGrid = document.getElementById('intervalGrid');
-            const chromaticNotesGrid = document.getElementById('chromaticNotesGrid');
-
-            // Event listeners
-            scaleSelect.addEventListener('change', () => {
-                handleScaleSelectChange();
-                updateUI();
-            });
-
-            rootNoteSelector.addEventListener('change', () => {
-                updateUI();
-                // If a random sequence exists, regenerate it with the new root note
-                if (randomSequence.length > 0) {
-                    generateRandomSequence();
+            // Inicializa el motor de audio Tone.js
+            initTone: async function() {
+                try {
+                    if (Tone.context.state !== 'running') {
+                        await Tone.start();
+                    }
+                    if (!this.state.synth) {
+                        this.state.synth = new Tone.PolySynth(Tone.FMSynth, {
+                            oscillator: { type: "triangle" },
+                            envelope: {
+                                attack: 0.05,
+                                decay: 0.1,
+                                sustain: 0.3,
+                                release: 0.8
+                            }
+                        }).toDestination();
+                    }
+                } catch (error) {
+                    console.error('Error initializing Tone.js:', error);
+                    this.showMessage('Ocurrió un error al inicializar el audio.');
                 }
-            });
-            
-            // New event listener for the number of random notes selector
-            numNotesSelect.addEventListener('change', () => {
-                // Only generate a new sequence if one already exists
-                if (randomSequence.length > 0) {
-                    generateRandomSequence();
+            },
+
+            // Maneja el cambio del selector de escala
+            handleScaleSelectChange: function() {
+                if (this.elements.scaleSelect.value === 'Custom') {
+                    this.elements.customScaleInputContainer.classList.remove('hidden');
+                } else {
+                    this.elements.customScaleInputContainer.classList.add('hidden');
                 }
-            });
+                this.updateUI();
+            },
 
-            enharmonicToggleButton.addEventListener('click', () => {
-                toggleEnharmonicMode();
-                updateUI(); // Calls updateUI to refresh all notes
-                // If a random sequence exists, regenerate its display with the new enharmonic mode
-                if (randomSequence.length > 0) {
-                    updateRandomSequenceDisplay();
-                    updateFinalCombinationUI();
-                }
-            });
-            generateButton.addEventListener('click', generateRandomSequence);
+            // Establece el modo de escala personalizada (Fórmula o Notas)
+            setCustomScaleMode: function(mode) {
+                this.state.customScaleMode = mode;
+                // Aplica y quita la clase 'selected' para el contraste visual
+                this.elements.formulaModeButton.classList.toggle('selected', mode === 'formula');
+                this.elements.notesModeButton.classList.toggle('selected', mode === 'notes');
+                this.elements.intervalGrid.classList.toggle('hidden', mode === 'notes');
+                this.elements.chromaticNotesGrid.classList.toggle('hidden', mode === 'formula');
+            },
 
-            majorResolutionsPanel.addEventListener('click', handleResolutionClick);
-            minorResolutionsPanel.addEventListener('click', handleResolutionClick);
-            playButton.addEventListener('click', playCombinedSequence);
-            clearButton.addEventListener('click', clearAll);
-            formulaModeButton.addEventListener('click', () => setCustomScaleMode('formula'));
-            notesModeButton.addEventListener('click', () => setCustomScaleMode('notes'));
-            
-            // Initial UI generation and setup
-            updateUI();
-            generateIntervalsUI();
-            generateChromaticNotesUI();
-            
-            // Function to initialize Tone.js (now more robust)
-            async function initTone() {
-                if (Tone.context.state !== 'running') {
-                    await Tone.start();
-                }
-                
-                if (!synth) {
-                    // Set up the synthesizer and effects
-                    synth = new Tone.PolySynth(Tone.FMSynth, {
-                        oscillator: { type: "triangle" },
-                        envelope: {
-                            attack: 0.05,
-                            decay: 0.1,
-                            sustain: 0.3,
-                            release: 0.8
-                        }
-                    }).toDestination();
-                    
-                    reverb = new Tone.Reverb({
-                        decay: 4,
-                        preDelay: 0.01,
-                        wet: 0.3
-                    }).toDestination();
-
-                    synth.connect(reverb);
-                    reverb.toDestination();
-                }
-            }
-
-            // Function to switch between 'formula' and 'notes' mode
-            function setCustomScaleMode(mode) {
-                customScaleMode = mode;
-                formulaModeButton.classList.toggle('active', mode === 'formula');
-                notesModeButton.classList.toggle('active', mode === 'notes');
-                intervalGrid.classList.toggle('hidden', mode === 'notes');
-                chromaticNotesGrid.classList.toggle('hidden', mode === 'formula');
-            }
-
-            // Generate the buttons for the custom intervals
-            function generateIntervalsUI() {
-                allIntervals.forEach(interval => {
+            // Genera la interfaz de usuario para los intervalos
+            generateIntervalsUI: function() {
+                this.elements.intervalGrid.innerHTML = '';
+                this.data.allIntervals.forEach(interval => {
                     const button = document.createElement('button');
-                    button.className = 'custom-interval-button';
+                    button.className = 'note-item cursor-pointer';
                     button.textContent = interval;
                     button.setAttribute('data-interval', interval);
-                    button.addEventListener('click', () => {
-                        button.classList.toggle('selected-interval');
-                    });
-                    intervalGrid.appendChild(button);
+                    button.addEventListener('click', () => button.classList.toggle('bg-blue-600'));
+                    this.elements.intervalGrid.appendChild(button);
                 });
-            }
+            },
 
-            // Generate the buttons for the chromatic scale
-            function generateChromaticNotesUI() {
-                chromaticNotesGrid.innerHTML = ''; // Clear existing buttons
-                chromaticNotesCanonical.forEach(canonicalNote => {
-                    const noteToDisplay = isFlatMode ? noteNames[canonicalNote].flat : noteNames[canonicalNote].sharp;
+            // Genera la interfaz de usuario para las notas cromáticas
+            generateChromaticNotesUI: function() {
+                this.elements.chromaticNotesGrid.innerHTML = '';
+                const notesToDisplay = this.state.isFlatMode ? ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] : ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                notesToDisplay.forEach(noteToDisplay => {
                     const button = document.createElement('button');
-                    button.className = 'chromatic-note-button';
+                    button.className = 'note-item cursor-pointer';
                     button.textContent = noteToDisplay;
+                    const canonicalNote = Object.keys(this.data.enharmonicNames).find(key => this.data.enharmonicNames[key].flat === noteToDisplay || this.data.enharmonicNames[key].sharp === noteToDisplay);
                     button.setAttribute('data-note', canonicalNote);
-                    button.addEventListener('click', () => {
-                        button.classList.toggle('selected-note');
-                    });
-                    chromaticNotesGrid.appendChild(button);
+                    button.addEventListener('click', () => button.classList.toggle('bg-blue-600'));
+                    this.elements.chromaticNotesGrid.appendChild(button);
                 });
-            }
+            },
 
-            // Handles changes in the scale dropdown, showing/hiding the custom scale input
-            function handleScaleSelectChange() {
-                if (scaleSelect.value === 'Personalizada') {
-                    customScaleInputContainer.classList.remove('hidden');
-                    setCustomScaleMode(customScaleMode); // Restore the last selected mode
-                } else {
-                    customScaleInputContainer.classList.add('hidden');
-                }
-            }
-
-            // Toggles between sharp and flat enharmonic display for scales and root note
-            function toggleEnharmonicMode() {
-                isFlatMode = !isFlatMode;
-                enharmonicToggleButton.textContent = isFlatMode ? 'Mostrar Sostenidos (#)' : 'Mostrar Bemoles (b)';
-                updateRootNoteSelector();
-                generateChromaticNotesUI(); // Re-render chromatic notes with new enharmonic spelling
-            }
-
-            // Updates the root note selector options with the correct enharmonic spelling
-            function updateRootNoteSelector() {
-                const currentCanonicalRoot = rootNoteSelector.value || 'C'; // Get current value or default to 'C'
+            // Actualiza el selector de nota fundamental
+            updateRootNoteSelector: function(currentRoot = 'C') {
+                const rootNoteSelector = this.elements.rootNoteSelector;
                 rootNoteSelector.innerHTML = '';
                 
-                const notesToDisplay = isFlatMode ? ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] : ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-                
-                notesToDisplay.forEach(noteToDisplay => {
-                    // Find the canonical note for the displayed name.
-                    const canonicalNote = Object.keys(noteNames).find(key => noteNames[key].flat === noteToDisplay || noteNames[key].sharp === noteToDisplay);
+                const notesToDisplay = this.state.isFlatMode ? ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'] : ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+                notesToDisplay.forEach((note, index) => {
                     const option = document.createElement('option');
-                    option.value = canonicalNote;
-                    option.textContent = noteToDisplay; 
+                    option.value = this.data.chromaticNotesCanonical[index];
+                    option.textContent = note;
                     rootNoteSelector.appendChild(option);
                 });
+                rootNoteSelector.value = currentRoot;
+            },
 
-                // Restore the selected value using its canonical name
-                rootNoteSelector.value = currentCanonicalRoot;
-                if (!rootNoteSelector.value) {
-                    rootNoteSelector.value = 'C';
-                }
-            }
+            // Alterna entre bemoles y sostenidos
+            toggleEnharmonicMode: function() {
+                const currentRoot = this.elements.rootNoteSelector.value;
+                this.state.isFlatMode = !this.state.isFlatMode;
+                this.elements.enharmonicToggleButton.textContent = this.state.isFlatMode ? 'Mostrar Sostenidos (#)' : 'Mostrar Bemoles (b)';
+                this.updateRootNoteSelector(currentRoot);
+                this.generateChromaticNotesUI();
+                this.updateResolutionsUI();
+            },
 
-            // Main function to update all UI elements that display notes
-            function updateUI() {
-                updateResolutionsUI();
-                updateRandomSequenceDisplay();
-                updateFinalCombinationUI();
-            }
-            
-            /**
-             * Determines the correct enharmonic note name based on the root note and the current enharmonic mode.
-             * This function has been corrected to simplify the logic and ensure it works reliably.
-             * @param {string} rootCanonical - The canonical root note (e.g., 'C', 'A#').
-             * @param {string} interval - The interval formula (e.g., 'b3', '5').
-             * @returns {string} The correctly spelled note name (e.g., 'Db' for a b3 in a Bb scale).
-             */
-            function getNoteName(rootCanonical, interval) {
-                // Get the index of the root note in the chromatic scale
-                const rootIndex = chromaticNotesCanonical.indexOf(rootCanonical);
-                // Get the semitones for the given interval
-                const semitones = intervalSemitones[interval];
+            // Obtiene el nombre de la nota enarmónico
+            getNoteName: function(rootCanonical, interval) {
+                const rootIndex = this.data.chromaticNotesCanonical.indexOf(rootCanonical);
+                const semitones = this.data.intervalSemitones[interval];
+                if (semitones === undefined) return 'N/A';
+                const targetIndex = (rootIndex + semitones + 12) % 12;
+                const canonicalTarget = this.data.chromaticNotesCanonical[targetIndex];
                 
-                if (semitones === undefined) {
-                    return 'N/A';
-                }
-                
-                // Calculate the index of the target note in the chromatic scale
-                const targetChromaticIndex = (rootIndex + semitones + 12) % 12;
-                const canonicalNoteAtTarget = chromaticNotesCanonical[targetChromaticIndex];
-                
-                // Use the enharmonic mode to select the correct spelling
-                return isFlatMode ? noteNames[canonicalNoteAtTarget].flat : noteNames[canonicalNoteAtTarget].sharp;
-            }
-            
-            // Function to update the resolution buttons' UI based on the selected root note
-            function updateResolutionsUI() {
-                const rootNoteCanonical = rootNoteSelector.value;
-                majorResolutionsPanel.innerHTML = '';
-                minorResolutionsPanel.innerHTML = '';
-
-                // Create major resolution buttons
-                resolutionsMajor.forEach((resolution) => {
-                    const button = document.createElement('button');
-                    button.className = 'resolution-button';
-                    button.setAttribute('data-id', resolution.id);
-                    
-                    // Generate the HTML for the note names and formula parts with unique IDs
-                    const noteNamesHtml = resolution.formula.map((interval, idx) => 
-                        `<span class="note-name note-name-${resolution.id}-${idx}">${getNoteName(rootNoteCanonical, interval)}</span>`
-                    ).join(' → ');
-                    
-                    const formulaPartsHtml = resolution.formula.map((interval, idx) => 
-                        `<span class="formula-part formula-part-${resolution.id}-${idx}">${interval}</span>`
-                    ).join(' ');
-
-                    button.innerHTML = `
-                        <span>${resolution.name}</span>
-                        <span class="resolution-description">(${formulaPartsHtml})<br/>(${noteNamesHtml})</span>
-                    `;
-                    
-                    if (selectedResolutions.includes(resolution.id)) {
-                        button.classList.add('selected');
-                    }
-                    
-                    majorResolutionsPanel.appendChild(button);
-                });
-
-                // Create minor resolution buttons
-                resolutionsMinor.forEach((resolution) => {
-                    const button = document.createElement('button');
-                    button.className = 'resolution-button';
-                    button.setAttribute('data-id', resolution.id);
-                    
-                    // Generate the HTML for the note names and formula parts with unique IDs
-                    const noteNamesHtml = resolution.formula.map((interval, idx) => 
-                        `<span class="note-name note-name-${resolution.id}-${idx}">${getNoteName(rootNoteCanonical, interval)}</span>`
-                    ).join(' → ');
-                    
-                    const formulaPartsHtml = resolution.formula.map((interval, idx) => 
-                        `<span class="formula-part formula-part-${resolution.id}-${idx}">${interval}</span>`
-                    ).join(' ');
-
-                    button.innerHTML = `
-                        <span>${resolution.name}</span>
-                        <span class="resolution-description">(${formulaPartsHtml})<br/>(${noteNamesHtml})</span>
-                    `;
-                    
-                    if (selectedResolutions.includes(resolution.id)) {
-                        button.classList.add('selected');
-                    }
-                    
-                    minorResolutionsPanel.appendChild(button);
-                });
-            }
-
-            // Handles resolution button clicks
-            async function handleResolutionClick(event) {
-                const button = event.target.closest('.resolution-button');
-                if (!button) return;
-                
-                const id = button.getAttribute('data-id');
-                const resolution = [...resolutionsMajor, ...resolutionsMinor].find(res => res.id === id);
-                if (!resolution) return;
-                
-                const index = selectedResolutions.indexOf(id);
-
-                if (index === -1) {
-                    // Play the resolution only when selecting it
-                    await playResolution(resolution.formula, resolution.id);
-                    selectedResolutions.push(id);
-                    button.classList.add('selected');
+                if (interval.includes('b')) {
+                    return this.data.enharmonicNames[canonicalTarget].flat;
+                } else if (interval.includes('#')) {
+                    return this.data.enharmonicNames[canonicalTarget].sharp;
                 } else {
-                    // Do not play sound when deselecting
-                    selectedResolutions.splice(index, 1);
-                    button.classList.remove('selected');
+                    if (this.state.isFlatMode) {
+                        return this.data.enharmonicNames[canonicalTarget].flat;
+                    } else {
+                        return this.data.enharmonicNames[canonicalTarget].sharp;
+                    }
                 }
-                
-                updateFinalCombinationUI();
-            }
+            },
+            
+            // Genera la secuencia de notas aleatorias
+            generateSequence: function() {
+                this.stopPlayback();
+                this.initTone();
+                const scaleType = this.elements.scaleSelect.value;
+                const availableIntervals = [];
 
-            // Plays a single resolution from its formula
-            async function playResolution(formula, resId) {
-                await initTone();
-                if (isPlaying) return;
-
-                const rootNoteCanonical = rootNoteSelector.value;
-                const bpm = parseInt(bpmInput.value, 10);
-                const rhythmFactor = parseFloat(rhythmSelector.value);
-                const noteDuration = (60000 / bpm) * rhythmFactor;
-                
-                const rootMidi = Tone.Frequency(rootNoteCanonical + '4').toMidi();
-                
-                isPlaying = true;
-                for (let i = 0; i < formula.length; i++) {
-                    const interval = formula[i];
-                    
-                    const semitones = intervalSemitones[interval];
-                    const noteMidi = rootMidi + semitones;
-                    const noteFreq = Tone.Midi(noteMidi).toFrequency();
-
-                    // Highlight the note in the resolution button while it plays
-                    const noteElement = document.querySelector(`.note-name-${resId}-${i}`);
-                    const formulaElement = document.querySelector(`.formula-part-${resId}-${i}`);
-                    if (noteElement) noteElement.classList.add('highlighted-note');
-                    if (formulaElement) formulaElement.classList.add('highlighted-note');
-                    
-                    synth.triggerAttackRelease(noteFreq, noteDuration / 1000);
-                    
-                    await new Promise(resolve => setTimeout(resolve, noteDuration));
-                    
-                    // Remove highlight after note plays
-                    if (noteElement) noteElement.classList.remove('highlighted-note');
-                    if (formulaElement) formulaElement.classList.remove('highlighted-note');
-                }
-                isPlaying = false;
-            }
-
-            // Generate a random, non-repeating sequence of notes from the selected scale
-            function generateRandomSequence() {
-                const selectedScaleName = scaleSelect.value;
-                let scaleIntervals;
-                const rootNoteCanonical = rootNoteSelector.value;
-
-                if (selectedScaleName === 'Personalizada') {
-                    if (customScaleMode === 'formula') {
-                        // Get intervals from the selected interval buttons
-                        const selectedButtons = document.querySelectorAll('#intervalGrid .selected-interval');
-                        if (selectedButtons.length === 0) {
-                            showMessage("Por favor, selecciona al menos un intervalo para tu escala personalizada.");
-                            return;
-                        }
-                        scaleIntervals = Array.from(selectedButtons).map(btn => btn.getAttribute('data-interval'));
-                    } else if (customScaleMode === 'notes') {
-                        // Get notes from the selected chromatic buttons and convert to intervals
-                        const selectedNotes = Array.from(document.querySelectorAll('.chromatic-note-button.selected-note')).map(btn => btn.getAttribute('data-note'));
-                        if (selectedNotes.length === 0) {
-                            showMessage("Por favor, selecciona al menos una nota para tu escala personalizada.");
-                            return;
-                        }
-                        scaleIntervals = selectedNotes.map(noteCanonical => {
-                            const rootIndex = chromaticNotesCanonical.indexOf(rootNoteCanonical);
-                            const noteIndex = chromaticNotesCanonical.indexOf(noteCanonical);
-                            const semitoneDifference = (noteIndex - rootIndex + 12) % 12;
-                            return semitoneToInterval[semitoneDifference];
+                if (scaleType === 'Major' || scaleType === 'Minor') {
+                    availableIntervals.push(...this.data.scalesData[scaleType]);
+                } else { // Personalizada
+                    const selectedButtons = Array.from(document.querySelectorAll('#intervalGrid .bg-blue-600, #chromaticNotesGrid .bg-blue-600'));
+                    if (this.state.customScaleMode === 'formula') {
+                        availableIntervals.push(...selectedButtons.map(btn => btn.getAttribute('data-interval')));
+                    } else { // modo notas
+                        const rootNoteCanonical = this.elements.rootNoteSelector.value;
+                        const rootIndex = this.data.chromaticNotesCanonical.indexOf(rootNoteCanonical);
+                        const selectedCanonicalNotes = selectedButtons.map(btn => btn.getAttribute('data-note'));
+                        
+                        selectedCanonicalNotes.forEach(note => {
+                            const noteIndex = this.data.chromaticNotesCanonical.indexOf(note);
+                            const semitones = (noteIndex - rootIndex + 12) % 12;
+                            const interval = Object.keys(this.data.intervalSemitones).find(key => this.data.intervalSemitones[key] === semitones);
+                            if (interval) {
+                                availableIntervals.push(interval);
+                            }
                         });
                     }
-                } else {
-                    scaleIntervals = scalesData[selectedScaleName];
                 }
 
-                const numNotes = parseInt(numNotesSelect.value, 10);
-                
-                // Ensure the number of notes doesn't exceed the scale's length
-                if (numNotes > scaleIntervals.length) {
-                    showMessage(`La escala seleccionada solo tiene ${scaleIntervals.length} notas. Por favor, elige un número menor.`);
-                    return;
-                }
-
-                // Create a mutable copy of the intervals to prevent repetitions
-                let availableIntervals = [...scaleIntervals];
-                randomSequence = [];
-
-                for (let i = 0; i < numNotes; i++) {
-                    const randomIndex = Math.floor(Math.random() * availableIntervals.length);
-                    const randomInterval = availableIntervals.splice(randomIndex, 1)[0];
-                    
-                    // The note name will be determined on the fly during display for correct enharmonic spelling
-                    randomSequence.push({
-                        interval: randomInterval,
-                        id: `random-${i}`
-                    });
+                for (let i = availableIntervals.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [availableIntervals[i], availableIntervals[j]] = [availableIntervals[j], availableIntervals[i]];
                 }
                 
-                updateRandomSequenceDisplay();
-                updateFinalCombinationUI();
-            }
+                const numNotes = parseInt(this.elements.numNotesSelect.value, 10);
+                this.state.randomSequence = availableIntervals.slice(0, numNotes);
+                
+                this.updateUI();
+            },
+
+            // Actualiza toda la interfaz de usuario
+            updateUI: function() {
+                this.updateResolutionsUI();
+                this.updateFinalCombinationUI();
+            },
             
-            // Displays a message to the user
-            function showMessage(message) {
+            // Actualiza el panel de resoluciones
+            updateResolutionsUI: function() {
+                const rootNoteCanonical = this.elements.rootNoteSelector.value;
+                this.elements.majorResolutionsPanel.innerHTML = '';
+                this.elements.minorResolutionsPanel.innerHTML = '';
+
+                const createButtons = (resolutions, parent) => {
+                    resolutions.forEach((resolution) => {
+                        const button = document.createElement('button');
+                        const isSelected = this.state.selectedResolutions.includes(resolution.id);
+                        button.className = `resolution-button ${isSelected ? 'selected' : ''}`;
+                        button.setAttribute('data-id', resolution.id);
+                        
+                        const noteNamesHtml = resolution.formula.map(interval => 
+                            `<span class="note-name note-to-highlight">${this.getNoteName(rootNoteCanonical, interval)}</span>`
+                        ).join(' → ');
+                        
+                        const formulaPartsHtml = resolution.formula.map(interval => 
+                            `<span class="formula-part">${interval}</span>`
+                        ).join(' ');
+
+                        button.innerHTML = `
+                            <span>${resolution.name}</span>
+                            <span class="resolution-description">(${formulaPartsHtml})<br/>(${noteNamesHtml})</span>
+                        `;
+                        parent.appendChild(button);
+                    });
+                };
+
+                createButtons(this.data.resolutionsMajor, this.elements.majorResolutionsPanel);
+                createButtons(this.data.resolutionsMinor, this.elements.minorResolutionsPanel);
+            },
+
+            // Maneja el clic en un botón de resolución
+            handleResolutionClick: async function(event) {
+                const button = event.target.closest('.resolution-button');
+                if (!button) return;
+                const id = button.getAttribute('data-id');
+                const index = this.state.selectedResolutions.indexOf(id);
+                const resolution = [...this.data.resolutionsMajor, ...this.data.resolutionsMinor].find(res => res.id === id);
+
+                // Detener cualquier reproducción en curso antes de manejar el clic
+                this.stopPlayback();
+
+                if (index === -1) {
+                    // Si el botón no está seleccionado, lo seleccionamos y reproducimos
+                    this.initTone();
+                    if (resolution) {
+                        const noteElements = Array.from(button.querySelectorAll('.note-to-highlight, .formula-part'));
+                        await this.playSequence(resolution.formula, noteElements);
+                    }
+                    this.state.selectedResolutions.push(id);
+                    button.classList.add('selected');
+                } else {
+                    // Si el botón ya está seleccionado, lo deseleccionamos
+                    this.state.selectedResolutions.splice(index, 1);
+                    button.classList.remove('selected');
+                }
+                this.updateFinalCombinationUI();
+            },
+
+            // Maneja el clic en una nota de la combinación final
+            handleFinalCombinationClick: function(event) {
+                const item = event.target.closest('.note-item');
+                if (!item) return;
+
+                const indexToRemove = Array.from(item.parentNode.children).indexOf(item);
+                const isResolutionNote = indexToRemove >= this.state.randomSequence.length;
+
+                if (isResolutionNote) {
+                    const allResolutions = [...this.data.resolutionsMajor, ...this.data.resolutionsMinor];
+                    let currentLength = this.state.randomSequence.length;
+                    
+                    for (const id of this.state.selectedResolutions) {
+                        const resolution = allResolutions.find(res => res.id === id);
+                        if (resolution) {
+                            const resolutionEndIndex = currentLength + resolution.formula.length;
+                            if (indexToRemove >= currentLength && indexToRemove < resolutionEndIndex) {
+                                this.state.selectedResolutions = this.state.selectedResolutions.filter(resId => resId !== id);
+                                break;
+                            }
+                            currentLength = resolutionEndIndex;
+                        }
+                    }
+                    this.updateUI();
+                }
+            },
+
+            // Muestra un mensaje temporal en la pantalla
+            showMessage: function(message) {
                 const messageBox = document.createElement('div');
-                messageBox.style.cssText = `
-                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    background-color: #E74C3C; color: white; padding: 1rem; border-radius: 0.5rem;
-                    z-index: 1000; text-align: center;
-                `;
+                messageBox.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white p-4 rounded-lg z-50 text-center shadow-lg';
                 messageBox.innerHTML = message;
                 document.body.appendChild(messageBox);
                 setTimeout(() => messageBox.remove(), 3000);
-            }
+            },
 
-            // Update the display of the random sequence notes
-            function updateRandomSequenceDisplay() {
-                if (randomSequence.length === 0) {
-                    randomSequenceDisplay.textContent = 'Genera una secuencia...'; // Clear text
-                    return;
-                }
-                const rootNoteCanonical = rootNoteSelector.value;
-
-                const notesHtml = randomSequence.map(note => {
-                    const noteName = getNoteName(rootNoteCanonical, note.interval);
-                    return `<span class="selected-item" id="note-name-${note.id}">${noteName} (${note.interval})</span>`;
-                }).join(' ');
-                randomSequenceDisplay.innerHTML = notesHtml;
-            }
-
-            // Update the display of the final combined sequence
-            function updateFinalCombinationUI() {
-                finalCombinationList.innerHTML = '';
-                const allResolutions = [...resolutionsMajor, ...resolutionsMinor];
-                const finalSequenceDisplay = [];
-                const rootNoteCanonical = rootNoteSelector.value;
+            // Actualiza el panel de combinación final
+            updateFinalCombinationUI: function() {
+                this.elements.finalCombinationList.innerHTML = '';
+                const allResolutions = [...this.data.resolutionsMajor, ...this.data.resolutionsMinor];
                 
-                // Add random sequence notes to the final display
-                if (randomSequence.length > 0) {
-                     finalSequenceDisplay.push(...randomSequence.map(note => ({
-                        note: getNoteName(rootNoteCanonical, note.interval),
-                        isRandom: true,
-                        id: note.id,
-                        interval: note.interval
-                     })));
-                }
-
-                // Add selected resolution notes to the final display
-                if (selectedResolutions.length > 0) {
-                    selectedResolutions.forEach(id => {
-                        const resolution = allResolutions.find(res => res.id === id);
-                        if (resolution) {
-                            resolution.formula.forEach((interval, idx) => {
-                                finalSequenceDisplay.push({
-                                    note: getNoteName(rootNoteCanonical, interval),
-                                    isRandom: false,
-                                    id: `res-${id}-${idx}`,
-                                    interval: interval
-                                });
-                            });
-                        }
-                    });
-                }
+                const finalSequenceDisplay = [...this.state.randomSequence.map(interval => ({ interval: interval, type: 'random' }))];
                 
-                // Render the final list of notes with unique IDs for highlighting
-                if (finalSequenceDisplay.length > 0) {
-                    finalCombinationList.innerHTML = finalSequenceDisplay.map((seqNote, index) => 
-                        `<span class="selected-item final-note-${index}">${seqNote.note}</span>`
-                    ).join(' ');
+                this.state.selectedResolutions.forEach(id => {
+                    const resolution = allResolutions.find(res => res.id === id);
+                    if (resolution) {
+                        finalSequenceDisplay.push(...resolution.formula.map(interval => ({ interval: interval, type: 'resolution' })));
+                    }
+                });
+
+                if (finalSequenceDisplay.length === 0) {
+                    this.elements.finalCombinationList.innerHTML = '<span class="note-item">Vacío</span>';
                 } else {
-                    finalCombinationList.innerHTML = '<span class="selected-item">Vacío</span>';
-                }
-            }
-
-            // Play the full sequence with a frequency-based approach to control octaves
-            async function playCombinedSequence() {
-                // Ensure Tone.js is initialized and the audio context is running
-                await initTone();
-                
-                if (isPlaying) {
-                    return;
-                }
-                
-                const rootNoteCanonical = rootNoteSelector.value;
-                const bpm = parseInt(bpmInput.value, 10);
-                const rhythmFactor = parseFloat(rhythmSelector.value);
-                const noteDuration = (60000 / bpm) * rhythmFactor;
-                const allResolutions = [...resolutionsMajor, ...resolutionsMinor];
-                const fullSequence = [];
-                
-                // Build the complete sequence from random notes and resolutions
-                if (randomSequence.length > 0) {
-                    fullSequence.push(...randomSequence);
-                }
-
-                if (selectedResolutions.length > 0) {
-                    selectedResolutions.forEach(id => {
-                        const resolution = allResolutions.find(res => res.id === id);
-                        if (resolution) {
-                            resolution.formula.forEach((interval, idx) => {
-                                fullSequence.push({
-                                    interval: interval,
-                                    isRandom: false,
-                                    id: `res-${id}-${idx}`
-                                });
-                            });
-                        }
+                    finalSequenceDisplay.forEach((seqNote, index) => {
+                        const rootNoteCanonical = this.elements.rootNoteSelector.value;
+                        const noteName = this.getNoteName(rootNoteCanonical, seqNote.interval);
+                        const noteItem = document.createElement('div');
+                        noteItem.className = 'note-item';
+                        noteItem.textContent = noteName;
+                        noteItem.setAttribute('data-index', index);
+                        this.elements.finalCombinationList.appendChild(noteItem);
                     });
                 }
+            },
+            
+            // Reproduce una secuencia de notas
+            playSequence: async function(notes, highlightElements = []) {
+                if (this.state.isPlaying) return;
                 
-                if (fullSequence.length === 0) {
-                    showMessage('No hay secuencia para reproducir.');
-                    return;
-                }
+                this.elements.playButton.classList.add('hidden');
+                this.elements.stopButton.classList.remove('hidden');
 
+                const rootNoteCanonical = this.elements.rootNoteSelector.value;
+                const bpm = parseInt(this.elements.bpmInput.value, 10);
+                const rhythmFactor = parseFloat(this.elements.rhythmSelector.value);
+                const noteDuration = (60000 / bpm) * rhythmFactor;
                 const rootMidi = Tone.Frequency(rootNoteCanonical + '4').toMidi();
                 
-                isPlaying = true;
-                for (let i = 0; i < fullSequence.length; i++) {
-                    const seqNote = fullSequence[i];
-                    
-                    // Highlight the note in the final combination display
-                    const finalNoteElement = document.querySelector(`.final-note-${i}`);
-                    if (finalNoteElement) finalNoteElement.classList.add('highlighted-item');
+                this.state.isPlaying = true;
+                
+                try {
+                    for (let i = 0; i < notes.length; i++) {
+                        if (!this.state.isPlaying) break;
+                        const interval = notes[i];
+                        const semitones = this.data.intervalSemitones[interval];
+                        const noteMidi = rootMidi + semitones;
+                        const noteFreq = Tone.Midi(noteMidi).toFrequency();
 
-                    // If the note belongs to a resolution, highlight it in the original button as well
-                    if (!seqNote.isRandom) {
-                        const [type, resIndex, noteIndex] = seqNote.id.split('-');
-                        const noteElement = document.querySelector(`.note-name-${resIndex}-${noteIndex}`);
-                        const formulaElement = document.querySelector(`.formula-part-${resIndex}-${noteIndex}`);
-                        if (noteElement) {
-                            noteElement.classList.add('highlighted-note');
+                        // Resalta el elemento si existe
+                        if (highlightElements[i]) {
+                            // CORRECCIÓN: Usamos la clase 'playing' o 'playing-note' según el tipo de elemento
+                            if (highlightElements[i].classList.contains('note-item')) {
+                                highlightElements[i].classList.add('playing');
+                            } else {
+                                highlightElements[i].classList.add('playing-note');
+                            }
                         }
-                        if (formulaElement) {
-                            formulaElement.classList.add('highlighted-note');
+                        
+                        if (this.state.synth) {
+                            this.state.synth.triggerAttackRelease(noteFreq, noteDuration / 1000);
+                        }
+                        
+                        await new Promise(resolve => setTimeout(resolve, noteDuration));
+                        
+                        // Remueve el resaltado
+                        if (highlightElements[i]) {
+                            highlightElements[i].classList.remove('playing', 'playing-note');
                         }
                     }
-                    
-                    // If it's a random note, also highlight it in the random sequence display
-                    if (seqNote.isRandom) {
-                       const randomNoteElement = document.getElementById(`note-name-${seqNote.id}`);
-                       if (randomNoteElement) {
-                           randomNoteElement.classList.add('highlighted-item');
-                       }
-                    }
-                    
-                    // Get the semitone offset from the interval
-                    const semitones = intervalSemitones[seqNote.interval];
-                    // Calculate the new note's MIDI value and convert to frequency
-                    const noteMidi = rootMidi + semitones;
-                    const noteFreq = Tone.Midi(noteMidi).toFrequency();
+                } catch (error) {
+                    console.error('Error during playback:', error);
+                    this.showMessage('Ocurrió un error al reproducir la música.');
+                } finally {
+                    this.stopPlayback();
+                }
+            },
 
-                    // Play the note using the calculated frequency
-                    synth.triggerAttackRelease(noteFreq, noteDuration / 1000);
-                    
-                    await new Promise(resolve => setTimeout(resolve, noteDuration));
-                    
-                    // Remove highlight after note plays
-                    if (finalNoteElement) finalNoteElement.classList.remove('highlighted-item');
-                    
-                    if (!seqNote.isRandom) {
-                        const [type, resIndex, noteIndex] = seqNote.id.split('-');
-                        const noteElement = document.querySelector(`.note-name-${resIndex}-${noteIndex}`);
-                        const formulaElement = document.querySelector(`.formula-part-${resIndex}-${noteIndex}`);
-                        if (noteElement) {
-                            noteElement.classList.remove('highlighted-note');
-                        }
-                        if (formulaElement) {
-                            formulaElement.classList.remove('highlighted-note');
-                        }
-                    }
+            // Detiene la reproducción
+            stopPlayback: function() {
+                this.state.isPlaying = false;
+                if (this.state.synth) {
+                    this.state.synth.releaseAll();
+                }
+                const highlighted = document.querySelectorAll('.playing, .playing-note');
+                highlighted.forEach(el => el.classList.remove('playing', 'playing-note'));
+                this.elements.playButton.classList.remove('hidden');
+                this.elements.stopButton.classList.add('hidden');
+            },
 
-                    if (seqNote.isRandom) {
-                        const randomNoteElement = document.getElementById(`note-name-${seqNote.id}`);
-                        if (randomNoteElement) {
-                            randomNoteElement.classList.remove('highlighted-item');
+            // Reproduce la secuencia combinada
+            playCombinedSequence: async function() {
+                this.stopPlayback();
+                this.initTone();
+                const fullSequence = [...this.state.randomSequence];
+                const allResolutions = [...this.data.resolutionsMajor, ...this.data.resolutionsMinor];
+                
+                if (this.state.selectedResolutions.length > 0) {
+                    this.state.selectedResolutions.forEach(id => {
+                        const resolution = allResolutions.find(res => res.id === id);
+                        if (resolution) {
+                            fullSequence.push(...resolution.formula);
                         }
-                    }
+                    });
+                }
+
+                if (fullSequence.length === 0) {
+                    this.showMessage('No hay secuencia para reproducir.');
+                    return;
                 }
                 
-                isPlaying = false;
-            }
+                const highlightElements = Array.from(this.elements.finalCombinationList.querySelectorAll('.note-item'));
+                await this.playSequence(fullSequence, highlightElements);
+            },
 
-            // Clear all selections and displays
-            function clearAll() {
-                randomSequence = [];
-                selectedResolutions = [];
+            // Limpia toda la aplicación
+            clearAll: function() {
+                this.stopPlayback();
+                this.state.randomSequence = [];
+                this.state.selectedResolutions = [];
                 const buttons = document.querySelectorAll('.resolution-button.selected');
                 buttons.forEach(button => button.classList.remove('selected'));
-                const intervalButtons = document.querySelectorAll('.custom-interval-button.selected-interval');
-                intervalButtons.forEach(button => button.classList.remove('selected-interval'));
-                const chromaticButtons = document.querySelectorAll('.chromatic-note-button.selected-note');
-                chromaticButtons.forEach(button => button.classList.remove('selected-note'));
-                
-                // Clear all highlights
-                const allHighlightedNotes = document.querySelectorAll('.highlighted-note');
-                allHighlightedNotes.forEach(el => el.classList.remove('highlighted-note'));
-                const allHighlightedItems = document.querySelectorAll('.highlighted-item');
-                allHighlightedItems.forEach(el => el.classList.remove('highlighted-item'));
-
-                updateRandomSequenceDisplay();
-                updateFinalCombinationUI();
+                const customScaleButtons = document.querySelectorAll('#intervalGrid .bg-blue-600, #chromaticNotesGrid .bg-blue-600');
+                customScaleButtons.forEach(button => button.classList.remove('bg-blue-600'));
+                this.updateUI();
             }
+        };
 
-            // Initial setup
-            updateRootNoteSelector();
-            updateRandomSequenceDisplay(); // This now shows the "Generar..." message initially
+        // Inicia la aplicación cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
         });
     </script>
 </body>
